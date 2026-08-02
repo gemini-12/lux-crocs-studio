@@ -183,7 +183,7 @@ export function Hero() {
               </motion.p>
 
               <h1
-                className="mt-6 font-display text-[clamp(2.6rem,7vw,6rem)] font-semibold leading-[0.92] tracking-[-0.03em]"
+                className="mt-6 font-display text-[clamp(2.4rem,6vw,5.2rem)] font-semibold leading-[0.92] tracking-[-0.03em]"
                 style={{ color: slide.ink }}
               >
                 <Letters text={slide.title} delay={0.12} />
@@ -229,7 +229,7 @@ export function Hero() {
         </div>
 
         {/* product */}
-        <div className="relative h-[42vh] lg:h-[70vh]">
+        <div className="relative h-[38vh] lg:h-[62vh]">
           <div
             className="absolute inset-0 will-change-transform"
             style={{
@@ -254,7 +254,7 @@ export function Hero() {
                   src={slide.image}
                   alt={slide.alt}
                   decoding="async"
-                  className="relative w-[92%] max-w-[760px] drop-shadow-[0_60px_60px_rgba(0,0,0,0.55)] will-change-transform"
+                  className="relative w-[86%] max-w-[680px] drop-shadow-[0_60px_60px_rgba(0,0,0,0.55)] will-change-transform"
                   style={{
                     transform: `perspective(1400px) rotateY(${tilt.x * 5}deg) rotateX(${-tilt.y * 4}deg) rotate(3deg)`,
                   }}
