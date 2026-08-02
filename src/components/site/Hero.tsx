@@ -8,19 +8,30 @@ const DURATION = 6000;
 
 function Letters({ text, delay = 0 }: { text: string; delay?: number }) {
   return (
-    <span aria-label={text} className="inline-block">
-      {text.split("").map((char, i) => (
-        <motion.span
-          key={`${char}-${i}`}
-          aria-hidden
-          className="inline-block will-change-transform"
-          initial={{ y: "0.6em", opacity: 0, rotateX: -60 }}
-          animate={{ y: 0, opacity: 1, rotateX: 0 }}
-          transition={{ duration: 0.8, ease: EASE, delay: delay + i * 0.032 }}
-        >
-          {char === " " ? "\u00A0" : char}
-        </motion.span>
-      ))}
+    <span aria-label={text}>
+      {text.split(" ").map((word, w) => {
+        const offset = text
+          .split(" ")
+          .slice(0, w)
+          .reduce((acc, cur) => acc + cur.length + 1, 0);
+        return (
+          <span key={`${word}-${w}`} className="inline-block whitespace-nowrap">
+            {word.split("").map((char, i) => (
+              <motion.span
+                key={`${char}-${i}`}
+                aria-hidden
+                className="inline-block will-change-transform"
+                initial={{ y: "0.6em", opacity: 0, rotateX: -60 }}
+                animate={{ y: 0, opacity: 1, rotateX: 0 }}
+                transition={{ duration: 0.8, ease: EASE, delay: delay + (offset + i) * 0.032 }}
+              >
+                {char}
+              </motion.span>
+            ))}
+            {w < text.split(" ").length - 1 && <span aria-hidden>&nbsp;</span>}
+          </span>
+        );
+      })}
     </span>
   );
 }
@@ -156,9 +167,9 @@ export function Hero() {
       </AnimatePresence>
       <div aria-hidden className="grain absolute inset-0" />
 
-      <div className="relative mx-auto grid h-full max-w-[1600px] grid-cols-1 items-center gap-6 px-6 pt-24 md:px-10 lg:grid-cols-[minmax(0,44%)_minmax(0,56%)]">
+      <div className="relative mx-auto grid h-full max-w-[1600px] grid-cols-1 items-center gap-6 px-6 pt-24 pb-28 md:px-10 lg:grid-cols-[minmax(0,44%)_minmax(0,56%)]">
         {/* copy */}
-        <div className="z-10 max-w-xl">
+        <div className="z-10 max-w-2xl">
           <AnimatePresence mode="wait">
             <div key={slide.id}>
               <motion.p

@@ -38,7 +38,7 @@ export function Collection() {
                 className="absolute -top-1/4 left-1/2 size-64 -translate-x-1/2 rounded-full opacity-0 blur-[90px] transition-opacity duration-700 group-hover:opacity-100"
                 style={{ background: s.glow }}
               />
-              <div className="relative grid h-56 place-items-center">
+              <div className="relative grid h-56 place-items-center overflow-hidden">
                 <img
                   src={s.image}
                   alt={s.alt}
