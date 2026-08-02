@@ -16,7 +16,7 @@ export function ProductSection() {
   const [size, setSize] = useState("42");
   const [qty, setQty] = useState(1);
   const [wished, setWished] = useState(false);
-  const product = slides[colorIndex];
+  const product = slides[colorIndex]!;
 
   return (
     <section id="product" className="relative border-t border-hairline py-28 md:py-40">

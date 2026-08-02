@@ -35,7 +35,7 @@ export function Hero() {
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const touchX = useRef<number | null>(null);
 
-  const slide = slides[index];
+  const slide = slides[index]!;
   const go = useCallback((n: number) => {
     setIndex((i) => (n + slides.length) % slides.length);
     setProgress(0);
@@ -111,11 +111,11 @@ export function Hero() {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onTouchStart={(e) => {
-        touchX.current = e.touches[0].clientX;
+        touchX.current = e.touches[0]!.clientX;
         setPaused(true);
       }}
       onTouchEnd={(e) => {
-        const dx = touchX.current === null ? 0 : e.changedTouches[0].clientX - touchX.current;
+        const dx = touchX.current === null ? 0 : e.changedTouches[0]!.clientX - touchX.current;
         if (Math.abs(dx) > 50) go(index + (dx < 0 ? 1 : -1));
         touchX.current = null;
         setPaused(false);
