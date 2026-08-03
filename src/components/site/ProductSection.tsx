@@ -161,10 +161,17 @@ export function ProductSection() {
               </button>
             </div>
 
-            <button className="cta-btn" style={{ backgroundColor: product.accent }}>
-              <span>Add to cart</span>
+            <button
+              onClick={handleOrder}
+              disabled={sending}
+              aria-busy={sending}
+              className="cta-btn disabled:cursor-not-allowed disabled:opacity-70"
+              style={{ backgroundColor: product.accent }}
+            >
+              <span>{sending ? "Opening WhatsApp…" : "Add to cart"}</span>
               <FiArrowRight aria-hidden className="cta-arrow" />
             </button>
+
 
             <button
               onClick={() => setWished((w) => !w)}
