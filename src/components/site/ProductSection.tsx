@@ -183,6 +183,14 @@ export function ProductSection() {
             </button>
           </div>
 
+          {error && (
+            <p role="alert" className="mt-4 text-sm" style={{ color: product.accent }}>
+              {error}
+            </p>
+          )}
+
+
+
           <dl className="mt-12 divide-y divide-hairline border-t border-hairline">
             {SPECS.map(([k, v]) => (
               <div key={k} className="flex justify-between gap-6 py-4 text-sm">
