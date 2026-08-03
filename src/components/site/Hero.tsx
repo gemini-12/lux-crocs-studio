@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { FiArrowRight, FiArrowUpRight } from "react-icons/fi";
+import { FiArrowLeft, FiArrowRight, FiArrowUpRight } from "react-icons/fi";
 import { slides } from "@/data/products";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -286,24 +286,64 @@ export function Hero() {
       </div>
 
       {/* thumbnails */}
-      <div className="absolute inset-x-0 bottom-6 z-10 flex justify-center px-6">
-        <div className="flex items-end gap-2 rounded-full border border-hairline bg-white/5 p-2 backdrop-blur-xl">
+      <div className="absolute inset-x-0 bottom-8 z-10 flex justify-center px-6 md:px-10">
+        <div className="flex items-center gap-4 md:gap-6">
+          <button
+            onClick={() => go(index - 1)}
+            aria-label="Previous slide"
+            className="group grid size-9 shrink-0 place-items-center text-muted-ink transition-colors duration-300 hover:text-ink"
+          >
+            <FiArrowLeft
+              aria-hidden
+              className="size-4 transition-transform duration-300 group-hover:-translate-x-1"
+              strokeWidth={1}
+            />
+          </button>
+
           {slides.map((s, i) => (
             <button
               key={s.id}
               onClick={() => go(i)}
               aria-label={`Show ${s.title}`}
               aria-current={i === index}
-              className={`grid size-14 place-items-center rounded-full transition-all duration-500 md:size-16 ${
-                i === index ? "scale-105 bg-white/12" : "opacity-45 hover:opacity-90"
-              }`}
-              style={i === index ? { boxShadow: `0 0 0 1px ${s.accent}` } : undefined}
+              className="grid size-14 shrink-0 place-items-center rounded-full transition-transform duration-300 ease-out will-change-transform md:size-16"
+              style={{
+                transform: `scale(${i === index ? 1.15 : 1})`,
+                boxShadow: i === index ? `0 0 28px -6px ${s.accent}, inset 0 0 0 1px ${s.accent}` : undefined,
+                opacity: i === index ? 1 : 0.5,
+                transition: "transform 300ms ease-out, opacity 300ms ease-out, box-shadow 300ms ease-out",
+              }}
+              onMouseEnter={(e) => {
+                if (i !== index) e.currentTarget.style.transform = "scale(1.08)";
+              }}
+              onMouseLeave={(e) => {
+                if (i !== index) e.currentTarget.style.transform = "scale(1)";
+              }}
             >
-              <img src={s.image} alt="" aria-hidden className="w-10 md:w-12" loading="lazy" />
+              <img
+                src={s.image}
+                alt=""
+                aria-hidden
+                className="size-10 object-contain md:size-12"
+                loading="lazy"
+              />
             </button>
           ))}
+
+          <button
+            onClick={() => go(index + 1)}
+            aria-label="Next slide"
+            className="group grid size-9 shrink-0 place-items-center text-muted-ink transition-colors duration-300 hover:text-ink"
+          >
+            <FiArrowRight
+              aria-hidden
+              className="size-4 transition-transform duration-300 group-hover:translate-x-1"
+              strokeWidth={1}
+            />
+          </button>
         </div>
       </div>
+
     </section>
   );
 }
