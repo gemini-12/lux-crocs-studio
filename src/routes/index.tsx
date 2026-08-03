@@ -10,7 +10,7 @@ import { Footer } from "@/components/site/Footer";
 
 const title = "Croc.Atelier — Collectible Crocs, Numbered Series";
 const description =
-  "Limited-edition collectible Crocs released in numbered series. Lightning, Blossom Riot, Phantom Noir and more, from the Croc.Atelier studio.";
+  "Limited-edition collectible Crocs released in numbered series. Cars, SpongeBob SquarePants and Batman Classic Clogs, from the Croc.Atelier studio.";
 
 export const Route = createFileRoute("/")({
   head: () => ({
