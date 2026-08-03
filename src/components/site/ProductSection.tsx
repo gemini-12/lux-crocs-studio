@@ -123,7 +123,10 @@ export function ProductSection() {
               {SIZES.map((s) => (
                 <button
                   key={s}
-                  onClick={() => setSize(s)}
+                  onClick={() => {
+                    setSize(s);
+                    setError(null);
+                  }}
                   aria-pressed={s === size}
                   className={`h-11 w-14 rounded-full border text-sm transition-colors duration-300 ${
                     s === size
