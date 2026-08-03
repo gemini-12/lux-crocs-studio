@@ -11,12 +11,50 @@ const SPECS = [
   ["Certificate", "Numbered, blockchain-backed"],
 ];
 
+const WHATSAPP_NUMBER = "212616378424";
+
 export function ProductSection() {
   const [colorIndex, setColorIndex] = useState(0);
-  const [size, setSize] = useState("42");
+  const [size, setSize] = useState<string | null>(null);
   const [qty, setQty] = useState(1);
   const [wished, setWished] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const product = slides[colorIndex]!;
+
+  const handleOrder = () => {
+    if (!size) {
+      setError("Please select a size before continuing.");
+      return;
+    }
+    setError(null);
+    setSending(true);
+
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    const message = [
+      "Hello,",
+      "",
+      "I would like to order the following Crocs:",
+      "",
+      `Product: ${product.title}`,
+      `Color: ${product.colorName}`,
+      `Size: EU ${size}`,
+      `Quantity: ${qty}`,
+      `Price: ${product.price}`,
+      `Product Link: ${url}`,
+      "",
+      "Thank you.",
+    ].join("\n");
+
+    window.setTimeout(() => {
+      window.open(
+        `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`,
+        "_blank",
+        "noopener,noreferrer",
+      );
+      setSending(false);
+    }, 300);
+  };
 
   return (
     <section id="product" className="relative border-t border-hairline py-28 md:py-40">
@@ -85,7 +123,10 @@ export function ProductSection() {
               {SIZES.map((s) => (
                 <button
                   key={s}
-                  onClick={() => setSize(s)}
+                  onClick={() => {
+                    setSize(s);
+                    setError(null);
+                  }}
                   aria-pressed={s === size}
                   className={`h-11 w-14 rounded-full border text-sm transition-colors duration-300 ${
                     s === size
@@ -120,10 +161,17 @@ export function ProductSection() {
               </button>
             </div>
 
-            <button className="cta-btn" style={{ backgroundColor: product.accent }}>
-              <span>Add to cart</span>
+            <button
+              onClick={handleOrder}
+              disabled={sending}
+              aria-busy={sending}
+              className="cta-btn disabled:cursor-not-allowed disabled:opacity-70"
+              style={{ backgroundColor: product.accent }}
+            >
+              <span>{sending ? "Opening WhatsApp…" : "Add to cart"}</span>
               <FiArrowRight aria-hidden className="cta-arrow" />
             </button>
+
 
             <button
               onClick={() => setWished((w) => !w)}
@@ -134,6 +182,14 @@ export function ProductSection() {
               <FiHeart aria-hidden className={wished ? "fill-current text-ink" : ""} />
             </button>
           </div>
+
+          {error && (
+            <p role="alert" className="mt-4 text-sm" style={{ color: product.accent }}>
+              {error}
+            </p>
+          )}
+
+
 
           <dl className="mt-12 divide-y divide-hairline border-t border-hairline">
             {SPECS.map(([k, v]) => (

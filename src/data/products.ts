@@ -13,6 +13,7 @@ export type Slide = {
   image: string;
   alt: string;
   price: string;
+  colorName: string;
   /** oklch color strings driving the slide atmosphere */
   accent: string;
   glow: string;
@@ -24,6 +25,7 @@ export type Slide = {
 export const slides: Slide[] = [
   {
     id: "lightning",
+    colorName: "Racing Red",
     eyebrow: "Collection 01",
     title: "Cars Classic Clog",
     release: "Limited Release — 500 pairs",
@@ -40,6 +42,7 @@ export const slides: Slide[] = [
   },
   {
     id: "citrus",
+    colorName: "High-Voltage Yellow",
     eyebrow: "Collection 02",
     title: "SpongeBob SquarePants Classic Clog",
     release: "Limited Release — 400 pairs",
@@ -56,6 +59,7 @@ export const slides: Slide[] = [
   },
   {
     id: "phantom",
+    colorName: "Phantom Black",
     eyebrow: "Collection 03",
     title: "Batman Classic Clog",
     release: "Limited Release — 150 pairs",
@@ -72,6 +76,7 @@ export const slides: Slide[] = [
   },
   {
     id: "rust",
+    colorName: "Rose Blush",
     eyebrow: "Collection 04",
     title: "Rose Blush Classic Clog",
     release: "Limited Release — 220 pairs",
@@ -88,6 +93,7 @@ export const slides: Slide[] = [
   },
   {
     id: "blossom",
+    colorName: "Pastel Pink",
     eyebrow: "Collection 05",
     title: "Patrick Star Classic Clog",
     release: "Limited Release — 300 pairs",
