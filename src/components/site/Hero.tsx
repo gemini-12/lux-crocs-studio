@@ -47,10 +47,14 @@ export function Hero() {
   const touchX = useRef<number | null>(null);
 
   const slide = slides[index]!;
+  const [locked, setLocked] = useState(false);
   const go = useCallback((n: number) => {
+    setLocked(true);
     setIndex((i) => (n + slides.length) % slides.length);
     setProgress(0);
+    setTimeout(() => setLocked(false), 1050);
   }, []);
+
 
   // autoplay with rAF-driven progress
   useEffect(() => {
@@ -269,81 +273,61 @@ export function Hero() {
         </div>
       </div>
 
-      {/* vertical progress indicator */}
-      <div className="absolute right-6 top-1/2 hidden -translate-y-1/2 flex-col items-center gap-3 lg:flex">
+      {/* side navigation arrows */}
+      {[
+        { dir: -1, label: "Previous slide", Icon: FiArrowLeft, side: "left-6 md:left-10 lg:left-14" },
+        { dir: 1, label: "Next slide", Icon: FiArrowRight, side: "right-6 md:right-10 lg:right-14" },
+      ].map(({ dir, label, Icon, side }) => (
+        <motion.button
+          key={label}
+          type="button"
+          onClick={() => go(index + dir)}
+          disabled={locked}
+          aria-label={label}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, y: reduce ? 0 : [0, -3, 0] }}
+          transition={{
+            opacity: { duration: 1, ease: EASE, delay: 0.6 },
+            y: { duration: 4.5, repeat: Infinity, ease: "easeInOut" },
+          }}
+          className={`group absolute top-1/2 z-20 grid size-14 -translate-y-1/2 cursor-pointer place-items-center rounded-full border border-hairline backdrop-blur-md transition-all duration-300 ease-out hover:scale-[1.08] disabled:pointer-events-none disabled:opacity-40 md:size-16 ${side}`}
+          style={{
+            color: slide.ink,
+            backgroundColor: "color-mix(in oklab, var(--ink) 8%, transparent)",
+            boxShadow: `0 18px 40px -20px rgb(0 0 0 / 0.8)`,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.boxShadow = `0 0 34px -8px ${slide.accent}, 0 18px 40px -20px rgb(0 0 0 / 0.8)`;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.boxShadow = `0 18px 40px -20px rgb(0 0 0 / 0.8)`;
+          }}
+        >
+          <Icon
+            aria-hidden
+            className={`size-5 transition-transform duration-300 ${dir < 0 ? "group-hover:-translate-x-1" : "group-hover:translate-x-1"}`}
+            strokeWidth={1}
+          />
+        </motion.button>
+      ))}
+
+      {/* progress indicator */}
+      <div className="absolute inset-x-0 bottom-10 z-10 flex justify-center gap-3">
         {slides.map((s, i) => (
-          <div key={s.id} className="h-14 w-px overflow-hidden bg-hairline">
+          <div key={s.id} className="h-px w-10 overflow-hidden bg-hairline">
             <motion.div
-              className="w-px origin-top"
+              className="h-px origin-left"
               style={{ backgroundColor: slide.accent }}
-              animate={{ scaleY: i < index ? 1 : i === index ? Math.max(progress, 0.04) : 0 }}
+              animate={{ scaleX: i < index ? 1 : i === index ? Math.max(progress, 0.04) : 0 }}
               transition={{ duration: 0.15, ease: "linear" }}
             >
-              <div className="h-14 w-px" />
+              <div className="h-px w-10" />
             </motion.div>
           </div>
         ))}
       </div>
 
-      {/* thumbnails */}
-      <div className="absolute inset-x-0 bottom-8 z-10 flex justify-center px-6 md:px-10">
-        <div className="flex items-center gap-4 md:gap-6">
-          <button
-            onClick={() => go(index - 1)}
-            aria-label="Previous slide"
-            className="group grid size-9 shrink-0 place-items-center text-muted-ink transition-colors duration-300 hover:text-ink"
-          >
-            <FiArrowLeft
-              aria-hidden
-              className="size-4 transition-transform duration-300 group-hover:-translate-x-1"
-              strokeWidth={1}
-            />
-          </button>
-
-          {slides.map((s, i) => (
-            <button
-              key={s.id}
-              onClick={() => go(i)}
-              aria-label={`Show ${s.title}`}
-              aria-current={i === index}
-              className="grid size-14 shrink-0 place-items-center rounded-full transition-transform duration-300 ease-out will-change-transform md:size-16"
-              style={{
-                transform: `scale(${i === index ? 1.15 : 1})`,
-                boxShadow: i === index ? `0 0 28px -6px ${s.accent}, inset 0 0 0 1px ${s.accent}` : undefined,
-                opacity: i === index ? 1 : 0.5,
-                transition: "transform 300ms ease-out, opacity 300ms ease-out, box-shadow 300ms ease-out",
-              }}
-              onMouseEnter={(e) => {
-                if (i !== index) e.currentTarget.style.transform = "scale(1.08)";
-              }}
-              onMouseLeave={(e) => {
-                if (i !== index) e.currentTarget.style.transform = "scale(1)";
-              }}
-            >
-              <img
-                src={s.image}
-                alt=""
-                aria-hidden
-                className="size-10 object-contain md:size-12"
-                loading="lazy"
-              />
-            </button>
-          ))}
-
-          <button
-            onClick={() => go(index + 1)}
-            aria-label="Next slide"
-            className="group grid size-9 shrink-0 place-items-center text-muted-ink transition-colors duration-300 hover:text-ink"
-          >
-            <FiArrowRight
-              aria-hidden
-              className="size-4 transition-transform duration-300 group-hover:translate-x-1"
-              strokeWidth={1}
-            />
-          </button>
-        </div>
-      </div>
-
     </section>
   );
 }
+
