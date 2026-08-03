@@ -11,12 +11,50 @@ const SPECS = [
   ["Certificate", "Numbered, blockchain-backed"],
 ];
 
+const WHATSAPP_NUMBER = "212616378424";
+
 export function ProductSection() {
   const [colorIndex, setColorIndex] = useState(0);
-  const [size, setSize] = useState("42");
+  const [size, setSize] = useState<string | null>(null);
   const [qty, setQty] = useState(1);
   const [wished, setWished] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const product = slides[colorIndex]!;
+
+  const handleOrder = () => {
+    if (!size) {
+      setError("Please select a size before continuing.");
+      return;
+    }
+    setError(null);
+    setSending(true);
+
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    const message = [
+      "Hello,",
+      "",
+      "I would like to order the following Crocs:",
+      "",
+      `Product: ${product.title}`,
+      `Color: ${product.colorName}`,
+      `Size: EU ${size}`,
+      `Quantity: ${qty}`,
+      `Price: ${product.price}`,
+      `Product Link: ${url}`,
+      "",
+      "Thank you.",
+    ].join("\n");
+
+    window.setTimeout(() => {
+      window.open(
+        `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`,
+        "_blank",
+        "noopener,noreferrer",
+      );
+      setSending(false);
+    }, 300);
+  };
 
   return (
     <section id="product" className="relative border-t border-hairline py-28 md:py-40">
