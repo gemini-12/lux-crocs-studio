@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSlides } from "@/data/slides-context";
+import { slides } from "@/data/products";
 
 export function Gallery() {
-  const slides = useSlides();
   const [active, setActive] = useState(0);
   const current = slides[active]!;
 

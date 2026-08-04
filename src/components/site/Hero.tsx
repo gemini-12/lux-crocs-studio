@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { FiArrowLeft, FiArrowRight, FiArrowUpRight } from "react-icons/fi";
-import { useSlides } from "@/data/slides-context";
+import { slides } from "@/data/products";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 const DURATION = 6000;
@@ -37,7 +37,6 @@ function Letters({ text, delay = 0 }: { text: string; delay?: number }) {
 }
 
 export function Hero() {
-  const slides = useSlides();
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [progress, setProgress] = useState(0);
