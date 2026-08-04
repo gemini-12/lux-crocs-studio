@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { FiHeart, FiMinus, FiPlus, FiArrowRight } from "react-icons/fi";
-import { slides } from "@/data/products";
+import { useSlides } from "@/data/slides-context";
 
-const SIZES = ["38", "39", "40", "41", "42", "43", "44"];
 const SPECS = [
   ["Material", "Croslite™ resin, hand-finished"],
   ["Hardware", "Anodised aluminium rivets"],
@@ -14,13 +13,17 @@ const SPECS = [
 const WHATSAPP_NUMBER = "212616378424";
 
 export function ProductSection() {
+  const slides = useSlides();
   const [colorIndex, setColorIndex] = useState(0);
   const [size, setSize] = useState<string | null>(null);
   const [qty, setQty] = useState(1);
   const [wished, setWished] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const product = slides[colorIndex]!;
+  const product = slides[Math.min(colorIndex, slides.length - 1)]!;
+  const sizeOptions = product.sizes.length
+    ? product.sizes
+    : ["38", "39", "40", "41", "42", "43", "44"];
 
   const handleOrder = () => {
     if (!size) {
@@ -118,7 +121,7 @@ export function ProductSection() {
           <div className="mt-8">
             <p className="text-[0.65rem] uppercase tracking-[0.35em] text-muted-ink">Size (EU)</p>
             <div className="mt-4 flex flex-wrap gap-2">
-              {SIZES.map((s) => (
+              {sizeOptions.map((s) => (
                 <button
                   key={s}
                   onClick={() => {
