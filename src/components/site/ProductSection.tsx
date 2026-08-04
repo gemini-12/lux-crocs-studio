@@ -46,12 +46,10 @@ export function ProductSection() {
       "Thank you.",
     ].join("\n");
 
+    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+
     window.setTimeout(() => {
-      window.open(
-        `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`,
-        "_blank",
-        "noopener,noreferrer",
-      );
       setSending(false);
     }, 300);
   };
