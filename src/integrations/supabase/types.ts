@@ -14,7 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      products: {
+        Row: {
+          accent: string
+          alt_text: string
+          bg_from: string
+          bg_to: string
+          category: string
+          color_name: string
+          colors: Json
+          created_at: string
+          description: string
+          display_order: number
+          eyebrow: string
+          gallery_images: string[]
+          glow: string
+          hero_image: string
+          id: string
+          ink: string
+          is_active: boolean
+          name: string
+          price: string
+          release_label: string
+          sizes: string[]
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          accent?: string
+          alt_text?: string
+          bg_from?: string
+          bg_to?: string
+          category?: string
+          color_name?: string
+          colors?: Json
+          created_at?: string
+          description?: string
+          display_order?: number
+          eyebrow?: string
+          gallery_images?: string[]
+          glow?: string
+          hero_image?: string
+          id?: string
+          ink?: string
+          is_active?: boolean
+          name: string
+          price?: string
+          release_label?: string
+          sizes?: string[]
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          accent?: string
+          alt_text?: string
+          bg_from?: string
+          bg_to?: string
+          category?: string
+          color_name?: string
+          colors?: Json
+          created_at?: string
+          description?: string
+          display_order?: number
+          eyebrow?: string
+          gallery_images?: string[]
+          glow?: string
+          hero_image?: string
+          id?: string
+          ink?: string
+          is_active?: boolean
+          name?: string
+          price?: string
+          release_label?: string
+          sizes?: string[]
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
