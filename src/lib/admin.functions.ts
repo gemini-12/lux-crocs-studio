@@ -119,14 +119,21 @@ export const adminReorderProducts = createServerFn({ method: "POST" })
   });
 
 export const adminUploadImage = createServerFn({ method: "POST" })
-  .inputValidator((d: { filename: string; contentType: string; dataBase64: string }) =>
-    z
-      .object({
-        filename: z.string().trim().min(1).max(160),
-        contentType: z.enum(["image/webp", "image/png", "image/jpeg"]),
-        dataBase64: z.string().max(12_000_000),
-      })
-      .parse(d),
+  .inputValidator(
+    (d: {
+      filename: string;
+      contentType: string;
+      dataBase64: string;
+      thumbBase64?: string;
+    }) =>
+      z
+        .object({
+          filename: z.string().trim().min(1).max(160),
+          contentType: z.enum(["image/webp", "image/png", "image/jpeg"]),
+          dataBase64: z.string().max(12_000_000),
+          thumbBase64: z.string().max(2_000_000).optional(),
+        })
+        .parse(d),
   )
   .handler(async ({ data }) => {
     const { requireAdmin, serviceClient } = await import("./admin.server");
@@ -138,6 +145,14 @@ export const adminUploadImage = createServerFn({ method: "POST" })
       .storage.from("product-images")
       .upload(path, bytes, { contentType: data.contentType, upsert: false });
     if (error) throw new Error(error.message);
+    if (data.thumbBase64) {
+      await serviceClient()
+        .storage.from("product-images")
+        .upload(`thumb-${path}`, Buffer.from(data.thumbBase64, "base64"), {
+          contentType: data.contentType,
+          upsert: false,
+        });
+    }
     return { url: `/api/public/media/${path}` };
   });
 
