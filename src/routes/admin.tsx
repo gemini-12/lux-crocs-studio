@@ -488,7 +488,10 @@ function ProductEditor({
   }, [onCancel]);
 
   const submit = () => {
-    if (!draft.name.trim()) return toast.error("A product name is required.");
+    if (!draft.name.trim()) {
+      toast.error("A product name is required.");
+      return;
+    }
     const slug = draft.slug.trim() || slugify(draft.name);
     onSave({ ...draft, slug, alt_text: draft.alt_text || draft.name });
   };
