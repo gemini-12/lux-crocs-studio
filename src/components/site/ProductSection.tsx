@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { FiHeart, FiMinus, FiPlus, FiArrowRight } from "react-icons/fi";
-import { slides } from "@/data/products";
+import { useSlides } from "@/data/products";
 
 const SIZES = ["38", "39", "40", "41", "42", "43", "44"];
 const SPECS = [
@@ -14,6 +14,7 @@ const SPECS = [
 const WHATSAPP_NUMBER = "212616378424";
 
 export function ProductSection() {
+  const slides = useSlides();
   const [colorIndex, setColorIndex] = useState(0);
   const [size, setSize] = useState<string | null>(null);
   const [qty, setQty] = useState(1);

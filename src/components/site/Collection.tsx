@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
 import { FiArrowUpRight } from "react-icons/fi";
-import { slides } from "@/data/products";
+import { useSlides } from "@/data/products";
 
 export function Collection() {
+  const slides = useSlides();
   return (
     <section id="collection" className="relative border-t border-hairline py-28 md:py-40">
       <div className="mx-auto max-w-[1600px] px-6 md:px-10">
