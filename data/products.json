@@ -1,12 +1,22 @@
 [
   {
     "id": "lightning",
-    "name": "Cars Classic Clog",
+    "name": "Cars Classic Clog X",
     "description": "Racing lacquer, hand-applied decals and a silhouette built for speed on any surface.",
     "price": "€240",
     "category": "Collection 01",
-    "sizes": ["38", "39", "40", "41", "42", "43", "44"],
-    "colors": ["Racing Red"],
+    "sizes": [
+      "38",
+      "39",
+      "40",
+      "41",
+      "42",
+      "43",
+      "44"
+    ],
+    "colors": [
+      "Racing Red"
+    ],
     "heroImage": "/__l5e/assets-v1/a7fa6c3c-e6d7-43a8-83bf-85c45970f8b3/21326256_53153321_1000-removebg-preview.png",
     "gallery": [],
     "displayOrder": 0,
@@ -25,8 +35,18 @@
     "description": "High-voltage yellow over a tangerine midsole. Loud, precise, unmistakable.",
     "price": "€230",
     "category": "Collection 02",
-    "sizes": ["38", "39", "40", "41", "42", "43", "44"],
-    "colors": ["High-Voltage Yellow"],
+    "sizes": [
+      "38",
+      "39",
+      "40",
+      "41",
+      "42",
+      "43",
+      "44"
+    ],
+    "colors": [
+      "High-Voltage Yellow"
+    ],
     "heroImage": "/__l5e/assets-v1/c31d98d0-6faf-42dd-bca6-58c1d013ea9e/crocs_classic_clog_spongebob_schwammkopf-removebg-preview.png",
     "gallery": [],
     "displayOrder": 1,
@@ -45,8 +65,18 @@
     "description": "Monolithic black-on-black. Matte body, gloss chassis, near-invisible detailing.",
     "price": "€310",
     "category": "Collection 03",
-    "sizes": ["38", "39", "40", "41", "42", "43", "44"],
-    "colors": ["Phantom Black"],
+    "sizes": [
+      "38",
+      "39",
+      "40",
+      "41",
+      "42",
+      "43",
+      "44"
+    ],
+    "colors": [
+      "Phantom Black"
+    ],
     "heroImage": "/__l5e/assets-v1/1468bd5b-80c6-49b4-aabc-7ed738bd907b/31818538_62158415_1000-removebg-preview.png",
     "gallery": [],
     "displayOrder": 2,
@@ -65,8 +95,18 @@
     "description": "Weathered copper patina with sculpted chrome hardware. An object with mileage.",
     "price": "€255",
     "category": "Collection 04",
-    "sizes": ["38", "39", "40", "41", "42", "43", "44"],
-    "colors": ["Rose Blush"],
+    "sizes": [
+      "38",
+      "39",
+      "40",
+      "41",
+      "42",
+      "43",
+      "44"
+    ],
+    "colors": [
+      "Rose Blush"
+    ],
     "heroImage": "/__l5e/assets-v1/9cf30b17-c11f-4d95-a33c-94c9b8aca5f7/CRO209376-0DA_1200x-removebg-preview.png",
     "gallery": [],
     "displayOrder": 3,
@@ -85,8 +125,18 @@
     "description": "Soft pastel resin cut with acid citrus blocks. Playful proportion, couture finish.",
     "price": "€265",
     "category": "Collection 05",
-    "sizes": ["38", "39", "40", "41", "42", "43", "44"],
-    "colors": ["Pastel Pink"],
+    "sizes": [
+      "38",
+      "39",
+      "40",
+      "41",
+      "42",
+      "43",
+      "44"
+    ],
+    "colors": [
+      "Pastel Pink"
+    ],
     "heroImage": "/__l5e/assets-v1/02ef6bc1-bf81-4ed5-abf6-0ab66bf5f9fe/23930324_54101768_1000-removebg-preview.png",
     "gallery": [],
     "displayOrder": 4,
