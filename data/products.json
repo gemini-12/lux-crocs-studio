@@ -1,0 +1,152 @@
+[
+  {
+    "id": "lightning",
+    "name": "Cars Classic Clog",
+    "description": "Racing lacquer, hand-applied decals and a silhouette built for speed on any surface.",
+    "price": "€240",
+    "category": "Collection 01",
+    "sizes": [
+      "38",
+      "39",
+      "40",
+      "41",
+      "42",
+      "43",
+      "44"
+    ],
+    "colors": [
+      "Racing Red"
+    ],
+    "heroImage": "/__l5e/assets-v1/a7fa6c3c-e6d7-43a8-83bf-85c45970f8b3/21326256_53153321_1000-removebg-preview.png",
+    "gallery": [],
+    "displayOrder": 0,
+    "active": true,
+    "release": "Limited Release — 500 pairs",
+    "alt": "Red Cars Classic Clog collectible Crocs with racing decals",
+    "accent": "oklch(0.62 0.23 27)",
+    "glow": "oklch(0.62 0.23 27 / 0.38)",
+    "bgFrom": "oklch(0.17 0.05 25)",
+    "bgTo": "oklch(0.09 0.02 20)",
+    "ink": "oklch(0.98 0.01 30)"
+  },
+  {
+    "id": "citrus",
+    "name": "SpongeBob SquarePants Classic Clog",
+    "description": "High-voltage yellow over a tangerine midsole. Loud, precise, unmistakable.",
+    "price": "€230",
+    "category": "Collection 02",
+    "sizes": [
+      "38",
+      "39",
+      "40",
+      "41",
+      "42",
+      "43",
+      "44"
+    ],
+    "colors": [
+      "High-Voltage Yellow"
+    ],
+    "heroImage": "/__l5e/assets-v1/c31d98d0-6faf-42dd-bca6-58c1d013ea9e/crocs_classic_clog_spongebob_schwammkopf-removebg-preview.png",
+    "gallery": [],
+    "displayOrder": 1,
+    "active": true,
+    "release": "Limited Release — 400 pairs",
+    "alt": "Yellow SpongeBob SquarePants Classic Clog collectible Crocs with orange sole",
+    "accent": "oklch(0.85 0.18 100)",
+    "glow": "oklch(0.88 0.17 100 / 0.3)",
+    "bgFrom": "oklch(0.22 0.05 95)",
+    "bgTo": "oklch(0.1 0.02 90)",
+    "ink": "oklch(0.99 0.02 100)"
+  },
+  {
+    "id": "phantom",
+    "name": "Batman Classic Clog",
+    "description": "Monolithic black-on-black. Matte body, gloss chassis, near-invisible detailing.",
+    "price": "€310",
+    "category": "Collection 03",
+    "sizes": [
+      "38",
+      "39",
+      "40",
+      "41",
+      "42",
+      "43",
+      "44"
+    ],
+    "colors": [
+      "Phantom Black"
+    ],
+    "heroImage": "/__l5e/assets-v1/1468bd5b-80c6-49b4-aabc-7ed738bd907b/31818538_62158415_1000-removebg-preview.png",
+    "gallery": [],
+    "displayOrder": 2,
+    "active": true,
+    "release": "Limited Release — 150 pairs",
+    "alt": "All black Batman Classic Clog collectible Crocs",
+    "accent": "oklch(0.75 0.03 250)",
+    "glow": "oklch(0.85 0.02 240 / 0.22)",
+    "bgFrom": "oklch(0.19 0.01 250)",
+    "bgTo": "oklch(0.08 0.005 250)",
+    "ink": "oklch(0.97 0.002 250)"
+  },
+  {
+    "id": "rust",
+    "name": "Rose Blush Classic Clog",
+    "description": "Weathered copper patina with sculpted chrome hardware. An object with mileage.",
+    "price": "€255",
+    "category": "Collection 04",
+    "sizes": [
+      "38",
+      "39",
+      "40",
+      "41",
+      "42",
+      "43",
+      "44"
+    ],
+    "colors": [
+      "Rose Blush"
+    ],
+    "heroImage": "/__l5e/assets-v1/9cf30b17-c11f-4d95-a33c-94c9b8aca5f7/CRO209376-0DA_1200x-removebg-preview.png",
+    "gallery": [],
+    "displayOrder": 3,
+    "active": true,
+    "release": "Limited Release — 220 pairs",
+    "alt": "Rose Blush Classic Clog collectible Crocs with sculpted detailing",
+    "accent": "oklch(0.68 0.15 55)",
+    "glow": "oklch(0.7 0.14 60 / 0.32)",
+    "bgFrom": "oklch(0.21 0.04 60)",
+    "bgTo": "oklch(0.1 0.02 50)",
+    "ink": "oklch(0.98 0.01 70)"
+  },
+  {
+    "id": "blossom",
+    "name": "Patrick Star Classic Clog",
+    "description": "Soft pastel resin cut with acid citrus blocks. Playful proportion, couture finish.",
+    "price": "€265",
+    "category": "Collection 05",
+    "sizes": [
+      "38",
+      "39",
+      "40",
+      "41",
+      "42",
+      "43",
+      "44"
+    ],
+    "colors": [
+      "Pastel Pink"
+    ],
+    "heroImage": "/__l5e/assets-v1/02ef6bc1-bf81-4ed5-abf6-0ab66bf5f9fe/23930324_54101768_1000-removebg-preview.png",
+    "gallery": [],
+    "displayOrder": 4,
+    "active": true,
+    "release": "Limited Release — 300 pairs",
+    "alt": "Pink Patrick Star Classic Clog collectible Crocs with lilac and yellow sole",
+    "accent": "oklch(0.78 0.15 5)",
+    "glow": "oklch(0.8 0.14 350 / 0.35)",
+    "bgFrom": "oklch(0.23 0.06 340)",
+    "bgTo": "oklch(0.11 0.03 330)",
+    "ink": "oklch(0.98 0.01 340)"
+  }
+]

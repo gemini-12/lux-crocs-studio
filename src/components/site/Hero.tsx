@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { FiArrowLeft, FiArrowRight, FiArrowUpRight } from "react-icons/fi";
-import { slides } from "@/data/products";
+import { useSlides } from "@/data/products";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 const DURATION = 6000;
@@ -37,6 +37,7 @@ function Letters({ text, delay = 0 }: { text: string; delay?: number }) {
 }
 
 export function Hero() {
+  const slides = useSlides();
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -46,7 +47,7 @@ export function Hero() {
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const touchX = useRef<number | null>(null);
 
-  const slide = slides[index]!;
+  const slide = slides[Math.min(index, slides.length - 1)]!;
   const [locked, setLocked] = useState(false);
   const go = useCallback((n: number) => {
     setLocked(true);
