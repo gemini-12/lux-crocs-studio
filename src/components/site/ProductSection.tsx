@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { FiHeart, FiMinus, FiPlus, FiArrowRight } from "react-icons/fi";
 import { useSlides } from "@/data/products";
 
-const SIZES = ["38", "39", "40", "41", "42", "43", "44"];
 const SPECS = [
   ["Material", "Croslite™ resin, hand-finished"],
   ["Hardware", "Anodised aluminium rivets"],
@@ -21,7 +20,7 @@ export function ProductSection() {
   const [wished, setWished] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const product = slides[colorIndex]!;
+  const product = slides[Math.min(colorIndex, slides.length - 1)]!;
 
   const handleOrder = () => {
     if (!size) {
@@ -119,7 +118,7 @@ export function ProductSection() {
           <div className="mt-8">
             <p className="text-[0.65rem] uppercase tracking-[0.35em] text-muted-ink">Size (EU)</p>
             <div className="mt-4 flex flex-wrap gap-2">
-              {SIZES.map((s) => (
+              {product.sizes.map((s) => (
                 <button
                   key={s}
                   onClick={() => {

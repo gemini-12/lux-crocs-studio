@@ -47,7 +47,7 @@ export function Hero() {
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const touchX = useRef<number | null>(null);
 
-  const slide = slides[index]!;
+  const slide = slides[Math.min(index, slides.length - 1)]!;
   const [locked, setLocked] = useState(false);
   const go = useCallback((n: number) => {
     setLocked(true);
