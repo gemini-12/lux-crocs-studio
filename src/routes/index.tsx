@@ -7,6 +7,8 @@ import { Collection } from "@/components/site/Collection";
 import { Gallery } from "@/components/site/Gallery";
 import { Newsletter } from "@/components/site/Newsletter";
 import { Footer } from "@/components/site/Footer";
+import { HiddenAdminAccess } from "@/components/site/HiddenAdminAccess";
+import { productsQueryOptions } from "@/data/products";
 
 const title = "Croc.Atelier — Collectible Crocs, Numbered Series";
 const description =
@@ -23,6 +25,7 @@ export const Route = createFileRoute("/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(productsQueryOptions),
   component: Index,
 });
 
@@ -39,6 +42,7 @@ function Index() {
         <Newsletter />
       </main>
       <Footer />
+      <HiddenAdminAccess />
     </>
   );
 }
