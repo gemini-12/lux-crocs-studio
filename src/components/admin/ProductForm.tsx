@@ -178,7 +178,14 @@ export function ProductForm({
   onCancel: () => void;
   submitLabel: string;
 }) {
-  const uploadFile = useUploader();
+  const [statuses, setStatuses] = useState<UploadStatus[]>([]);
+  const report = useCallback((s: UploadStatus) => {
+    setStatuses((prev) => {
+      const rest = prev.filter((p) => !(p.name === s.name && p.size === s.size));
+      return [...rest, s];
+    });
+  }, []);
+  const uploadFile = useUploader(report);
   const [busy, setBusy] = useState(false);
   const set = <K extends keyof Draft>(key: K, v: Draft[K]) => onChange({ ...value, [key]: v });
 
