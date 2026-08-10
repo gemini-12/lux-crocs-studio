@@ -14,6 +14,7 @@ import {
 } from "@/lib/cms.server";
 
 export const getProducts = createServerFn({ method: "GET" }).handler(async () => {
+  setResponseHeader("cache-control", "no-store, must-revalidate");
   return readProducts();
 });
 
