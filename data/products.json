@@ -1,9 +1,9 @@
 [
   {
     "id": "lightning",
-    "name": "Cars Classic Clog",
+    "name": "Cars Classic Clog EDITED",
     "description": "Racing lacquer, hand-applied decals and a silhouette built for speed on any surface.",
-    "price": "€240",
+    "price": "€999",
     "category": "Collection 01",
     "sizes": [
       "38",
@@ -17,7 +17,7 @@
     "colors": [
       "Racing Red"
     ],
-    "heroImage": "/__l5e/assets-v1/a7fa6c3c-e6d7-43a8-83bf-85c45970f8b3/21326256_53153321_1000-removebg-preview.png",
+    "heroImage": "/images/big-msn3f2dag31x.webp",
     "gallery": [],
     "displayOrder": 0,
     "active": true,
