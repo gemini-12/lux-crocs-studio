@@ -148,14 +148,19 @@ function Dashboard({ onLoggedOut }: { onLoggedOut: () => void }) {
 
   const saveMutation = useMutation({
     mutationFn: (next: Product[]) => save({ data: { products: next } }),
-    onSuccess: (saved) => {
-      setItems(saved);
+    onSuccess: (res) => {
+      if (!res.ok) {
+        toast.error(`Could not save: ${res.error}`);
+        return;
+      }
+      setItems(res.products);
       setDirty(false);
-      qc.setQueryData(productsQueryOptions.queryKey, saved);
+      qc.setQueryData(productsQueryOptions.queryKey, res.products);
       qc.invalidateQueries({ queryKey: ["products"] });
       toast.success("Changes saved — storefront updated");
     },
-    onError: () => toast.error("Could not save changes"),
+    onError: (error) =>
+      toast.error(`Could not save changes: ${error instanceof Error ? error.message : "unknown"}`),
   });
 
   const stats = useMemo(

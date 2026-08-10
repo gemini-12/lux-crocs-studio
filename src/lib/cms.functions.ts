@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { setResponseHeader } from "@tanstack/react-start/server";
 
 import type { Product } from "@/data/products";
 import {
@@ -13,6 +14,7 @@ import {
 } from "@/lib/cms.server";
 
 export const getProducts = createServerFn({ method: "GET" }).handler(async () => {
+  setResponseHeader("cache-control", "no-store, must-revalidate");
   return readProducts();
 });
 
@@ -41,9 +43,16 @@ export const saveProductsFn = createServerFn({ method: "POST" })
   .inputValidator((data: { products: Product[] }) => data)
   .handler(async ({ data }) => {
     await requireAdmin();
-    const saved = await writeProducts(data.products);
-    await pruneUnusedImages(saved);
-    return saved;
+    setResponseHeader("cache-control", "no-store");
+    try {
+      const saved = await writeProducts(data.products);
+      await pruneUnusedImages(saved);
+      return { ok: true as const, products: saved };
+    } catch (error) {
+      console.error("[cms] saving products failed:", error);
+      const message = error instanceof Error ? error.message : "Unknown error";
+      return { ok: false as const, error: message, products: [] as Product[] };
+    }
   });
 
 export const uploadImageFn = createServerFn({ method: "POST" })

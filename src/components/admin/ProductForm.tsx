@@ -1,11 +1,9 @@
 import { useCallback, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { FiUploadCloud, FiX } from "react-icons/fi";
-import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 
 import type { Product } from "@/data/products";
-import { uploadImageFn } from "@/lib/cms.functions";
 
 const ACCEPT = ["image/png", "image/webp", "image/jpeg", "image/jpg"];
 
@@ -37,31 +35,90 @@ const field =
   "w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-white/30 focus:border-white/30";
 const label = "text-[0.65rem] uppercase tracking-[0.24em] text-white/45";
 
-function useUploader() {
-  const upload = useServerFn(uploadImageFn);
+type UploadStatus = {
+  name: string;
+  size: number;
+  preview: string;
+  state: "uploading" | "done" | "error";
+  message?: string;
+};
+
+function formatSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+}
+
+/** Uploads via multipart/form-data to the server route — no base64 bloat. */
+function useUploader(report: (s: UploadStatus) => void) {
   return useCallback(
     async (file: File): Promise<string | null> => {
+      const preview = URL.createObjectURL(file);
+      const base = { name: file.name, size: file.size, preview };
+
       if (!ACCEPT.includes(file.type.toLowerCase())) {
-        toast.error("Unsupported format. Use PNG, WEBP or JPEG.");
+        const message = `Unsupported format "${file.type || "unknown"}". Use PNG, WEBP or JPEG.`;
+        report({ ...base, state: "error", message });
+        toast.error(message);
         return null;
       }
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result));
-        reader.onerror = () => reject(reader.error);
-        reader.readAsDataURL(file);
-      });
+
+      report({ ...base, state: "uploading" });
       try {
-        const res = await upload({ data: { dataUrl, name: file.name } });
-        return res.url;
-      } catch {
-        toast.error("Upload failed");
+        const body = new FormData();
+        body.append("file", file, file.name);
+        const res = await fetch("/api/admin/upload", { method: "POST", body });
+        const payload = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+        if (!res.ok || !payload.url) {
+          const message = payload.error ?? `Upload failed (HTTP ${res.status})`;
+          report({ ...base, state: "error", message });
+          toast.error(message);
+          return null;
+        }
+        report({ ...base, state: "done", message: "Upload successful" });
+        return payload.url;
+      } catch (error) {
+        const message = `Upload failed: ${error instanceof Error ? error.message : "network error"}`;
+        report({ ...base, state: "error", message });
+        toast.error(message);
         return null;
       }
     },
-    [upload],
+    [report],
   );
 }
+
+function UploadStatusList({ items }: { items: UploadStatus[] }) {
+  if (!items.length) return null;
+  return (
+    <ul className="grid gap-2">
+      {items.map((s) => (
+        <li
+          key={`${s.name}-${s.size}-${s.state}`}
+          className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-2"
+        >
+          <img src={s.preview} alt="" className="size-10 rounded-lg object-contain" />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xs text-white/80">{s.name}</p>
+            <p className="text-[0.65rem] text-white/40">{formatSize(s.size)}</p>
+          </div>
+          <span
+            className={`text-[0.65rem] ${
+              s.state === "error"
+                ? "text-red-400"
+                : s.state === "done"
+                  ? "text-emerald-300"
+                  : "text-white/50"
+            }`}
+          >
+            {s.state === "uploading" ? "Uploading…" : (s.message ?? "")}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 
 function Dropzone({
   onFiles,
@@ -121,7 +178,14 @@ export function ProductForm({
   onCancel: () => void;
   submitLabel: string;
 }) {
-  const uploadFile = useUploader();
+  const [statuses, setStatuses] = useState<UploadStatus[]>([]);
+  const report = useCallback((s: UploadStatus) => {
+    setStatuses((prev) => {
+      const rest = prev.filter((p) => !(p.name === s.name && p.size === s.size));
+      return [...rest, s];
+    });
+  }, []);
+  const uploadFile = useUploader(report);
   const [busy, setBusy] = useState(false);
   const set = <K extends keyof Draft>(key: K, v: Draft[K]) => onChange({ ...value, [key]: v });
 
@@ -290,6 +354,7 @@ export function ProductForm({
           <FiUploadCloud aria-hidden className="mx-auto mb-2 text-white/60" />
           <p className="text-xs text-white/50">Drop multiple images</p>
         </Dropzone>
+        <UploadStatusList items={statuses} />
       </div>
 
       <div className="grid gap-2">
