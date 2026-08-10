@@ -354,6 +354,7 @@ export function ProductForm({
           <FiUploadCloud aria-hidden className="mx-auto mb-2 text-white/60" />
           <p className="text-xs text-white/50">Drop multiple images</p>
         </Dropzone>
+        <UploadStatusList items={statuses} />
       </div>
 
       <div className="grid gap-2">
