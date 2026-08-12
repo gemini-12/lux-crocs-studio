@@ -1,4 +1,4 @@
-import { createHash, timingSafeEqual } from "node:crypto";
+import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import { useSession } from "@tanstack/react-start/server";
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
@@ -127,7 +127,7 @@ function productToRow(p: Product, index: number) {
     ink: "oklch(0.97 0.002 250)",
   };
   const row: {
-    id?: string;
+    id: string;
     slug: string;
     name: string;
     [k: string]: unknown;
@@ -154,7 +154,7 @@ function productToRow(p: Product, index: number) {
     is_active: p.active !== false,
     updated_at: new Date().toISOString(),
   };
-  if (UUID_RE.test(String(p.id))) row.id = p.id;
+  row.id = UUID_RE.test(String(p.id)) ? String(p.id) : randomUUID();
   return row;
 }
 
@@ -215,8 +215,6 @@ export async function writeProducts(products: Product[]): Promise<Product[]> {
   }
 
   const rows = incoming.map(productToRow);
-  const updates = rows.filter((r) => r.id);
-  const inserts = rows.filter((r) => !r.id);
 
   const fail = (label: string, error: { code?: string; message?: string } | null) => {
     if (!error) return;
@@ -228,15 +226,11 @@ export async function writeProducts(products: Product[]): Promise<Product[]> {
     );
   };
 
-  if (updates.length) {
+  if (rows.length) {
     const { error } = await supabaseAdmin
       .from("products")
-      .upsert(updates as never, { onConflict: "id" });
+      .upsert(rows as never, { onConflict: "id" });
     fail("upsert", error);
-  }
-  if (inserts.length) {
-    const { error } = await supabaseAdmin.from("products").insert(inserts as never);
-    fail("insert", error);
   }
 
   return readProducts();
