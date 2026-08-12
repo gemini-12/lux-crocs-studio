@@ -126,7 +126,12 @@ function productToRow(p: Product, index: number) {
     bgTo: "oklch(0.08 0.005 250)",
     ink: "oklch(0.97 0.002 250)",
   };
-  const row: Record<string, unknown> = {
+  const row: {
+    id?: string;
+    slug: string;
+    name: string;
+    [k: string]: unknown;
+  } = {
     slug: slugify(p.name || String(p.id)),
     name: p.name,
     description: p.description ?? "",
@@ -149,7 +154,7 @@ function productToRow(p: Product, index: number) {
     is_active: p.active !== false,
     updated_at: new Date().toISOString(),
   };
-  if (UUID_RE.test(String(p.id))) row["id"] = p.id;
+  if (UUID_RE.test(String(p.id))) row.id = p.id;
   return row;
 }
 
@@ -211,7 +216,7 @@ export async function writeProducts(products: Product[]): Promise<Product[]> {
 
   const rows = incoming.map(productToRow);
   if (rows.length) {
-    const { error } = await supabaseAdmin.from("products").upsert(rows, { onConflict: "id" });
+    const { error } = await supabaseAdmin.from("products").upsert(rows as never, { onConflict: "id" });
     if (error) {
       console.error("[cms] upsert failed:", error);
       throw new Error(
