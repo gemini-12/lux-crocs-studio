@@ -23,19 +23,21 @@ export const Route = createFileRoute("/api/admin/upload")({
 
           const form = await request.formData();
           const file = form.get("file");
+          const folder = String(form.get("folder") ?? "uploads");
           if (!(file instanceof File)) {
             return json({ error: 'Missing "file" field in the upload' }, 400);
           }
 
           const bytes = new Uint8Array(await file.arrayBuffer());
-          const url = await saveImageBytes(bytes, file.type, file.name);
+          const url = await saveImageBytes(bytes, file.type, file.name, folder);
           return json({ url, size: bytes.byteLength, name: file.name }, 200);
         } catch (error) {
           console.error("[cms] image upload failed:", error);
           const message =
-            error instanceof Error && /Unsupported|empty|Invalid/i.test(error.message)
+            error instanceof Error &&
+            /Unsupported|empty|Invalid|Storage rejected/i.test(error.message)
               ? error.message
-              : "The server could not store the image. Check the server logs for details.";
+              : "The image could not be stored. Please try again.";
           return json({ error: message }, 500);
         }
       },
