@@ -2,7 +2,7 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 
 import { getProducts } from "@/lib/cms.functions";
 
-/** Shape stored in /data/products.json — the single source of truth. */
+/** Product shape stored in the cloud database — the single source of truth. */
 export type Product = {
   id: string;
   name: string;

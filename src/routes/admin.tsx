@@ -377,14 +377,13 @@ function Dashboard({ onLoggedOut }: { onLoggedOut: () => void }) {
               {tab === "settings" && (
                 <div className="grid gap-4 rounded-3xl border border-white/10 bg-white/[0.04] p-8 text-sm text-white/60 backdrop-blur-2xl">
                   <p>
-                    Catalogue source:{" "}
-                    <span className="text-white">/data/products.json</span>
+                    Catalogue source: <span className="text-white">Cloud database</span>
                   </p>
                   <p>
-                    Uploads folder: <span className="text-white">/public/images/</span>
+                    Image storage: <span className="text-white">Cloud storage bucket</span>
                   </p>
                   <p>
-                    The storefront reads this file on every load — saving here updates the hero
+                    The storefront reads the database on every load — saving here updates the hero
                     slider, product page, collection grid and gallery instantly.
                   </p>
                 </div>

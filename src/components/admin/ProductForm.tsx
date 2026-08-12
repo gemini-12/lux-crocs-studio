@@ -49,10 +49,10 @@ function formatSize(bytes: number) {
   return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
 }
 
-/** Uploads via multipart/form-data to the server route — no base64 bloat. */
+/** Uploads via multipart/form-data to the server route → Supabase Storage. */
 function useUploader(report: (s: UploadStatus) => void) {
   return useCallback(
-    async (file: File): Promise<string | null> => {
+    async (file: File, folder: string): Promise<string | null> => {
       const preview = URL.createObjectURL(file);
       const base = { name: file.name, size: file.size, preview };
 
@@ -67,6 +67,7 @@ function useUploader(report: (s: UploadStatus) => void) {
       try {
         const body = new FormData();
         body.append("file", file, file.name);
+        body.append("folder", folder || "uploads");
         const res = await fetch("/api/admin/upload", { method: "POST", body });
         const payload = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
         if (!res.ok || !payload.url) {
@@ -193,7 +194,7 @@ export function ProductForm({
     const file = files[0];
     if (!file) return;
     setBusy(true);
-    const url = await uploadFile(file);
+    const url = await uploadFile(file, value.name);
     setBusy(false);
     if (url) set("heroImage", url);
   };
@@ -201,7 +202,7 @@ export function ProductForm({
   const handleGallery = async (files: File[]) => {
     if (!files.length) return;
     setBusy(true);
-    const urls = (await Promise.all(files.map(uploadFile))).filter(Boolean) as string[];
+    const urls = (await Promise.all(files.map((f) => uploadFile(f, value.name)))).filter(Boolean) as string[];
     setBusy(false);
     if (urls.length) set("gallery", [...value.gallery, ...urls]);
   };
