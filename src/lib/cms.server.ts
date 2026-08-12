@@ -1,75 +1,19 @@
-import { promises as fs } from "node:fs";
-import path from "node:path";
-import { createHash, timingSafeEqual } from "node:crypto";
+import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import { useSession } from "@tanstack/react-start/server";
 
-import seed from "../../data/products.json";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Product } from "@/data/products";
 
-/**
- * Resolve the project root deterministically instead of trusting process.cwd().
- * Walks up from cwd (and from this module's directory as a fallback) until it
- * finds the directory that owns package.json.
- */
-let cachedRoot: string | null = null;
-
-async function exists(p: string) {
-  try {
-    await fs.stat(p);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-async function walkUpForPackageJson(start: string): Promise<string | null> {
-  let dir = start;
-  for (let i = 0; i < 8; i += 1) {
-    if (await exists(path.join(dir, "package.json"))) return dir;
-    const parent = path.dirname(dir);
-    if (parent === dir) break;
-    dir = parent;
-  }
-  return null;
-}
-
-export async function projectRoot(): Promise<string> {
-  if (cachedRoot) return cachedRoot;
-  const candidates: string[] = [];
-  try {
-    candidates.push(process.cwd());
-  } catch {
-    /* cwd unavailable in some runtimes */
-  }
-  try {
-    const here = path.dirname(new URL(import.meta.url).pathname);
-    candidates.push(here);
-  } catch {
-    /* import.meta.url unavailable */
-  }
-  for (const c of candidates) {
-    const found = await walkUpForPackageJson(c);
-    if (found) {
-      cachedRoot = found;
-      return found;
-    }
-  }
-  cachedRoot = candidates[0] ?? "/";
-  return cachedRoot;
-}
-
-export async function dataFile() {
-  return path.join(await projectRoot(), "data", "products.json");
-}
-
-export async function imagesDir() {
-  return path.join(await projectRoot(), "public", "images");
-}
+export const BUCKET = "product-images";
+/** Public path prefix served by src/routes/images/$.ts (streams from Storage). */
+export const IMAGE_URL_PREFIX = "/images/";
 
 /** Server-only. Never imported by client code. */
 const ADMIN_PASSWORD = process.env["ADMIN_PASSWORD"] ?? "simo123";
 const SESSION_PASSWORD =
-  process.env["SESSION_SECRET"] ?? "croc-atelier-admin-session-secret-key-v1-2026";
+  process.env["ADMIN_SESSION_SECRET"] ??
+  process.env["SESSION_SECRET"] ??
+  "croc-atelier-admin-session-secret-key-v1-2026";
 
 const sessionConfig = {
   password: SESSION_PASSWORD,
@@ -103,32 +47,133 @@ export async function requireAdmin() {
   }
 }
 
-function normalize(list: unknown): Product[] {
-  if (!Array.isArray(list)) return [];
-  return (list as Product[])
-    .map((p, i) => ({
-      ...p,
-      sizes: Array.isArray(p.sizes) ? p.sizes : [],
-      colors: Array.isArray(p.colors) ? p.colors : [],
-      gallery: Array.isArray(p.gallery) ? p.gallery : [],
-      displayOrder: typeof p.displayOrder === "number" ? p.displayOrder : i,
-      active: p.active !== false,
-    }))
-    .sort((a, b) => a.displayOrder - b.displayOrder);
+/* ------------------------------------------------------------------ */
+/* Row <-> Product mapping                                             */
+/* ------------------------------------------------------------------ */
+
+type Row = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  price: string;
+  category: string;
+  color_name: string;
+  eyebrow: string;
+  release_label: string;
+  alt_text: string;
+  sizes: string[];
+  colors: unknown;
+  hero_image: string;
+  gallery_images: string[];
+  accent: string;
+  glow: string;
+  bg_from: string;
+  bg_to: string;
+  ink: string;
+  display_order: number;
+  is_active: boolean;
+};
+
+const COLUMNS =
+  "id, slug, name, description, price, category, color_name, eyebrow, release_label, alt_text, sizes, colors, hero_image, gallery_images, accent, glow, bg_from, bg_to, ink, display_order, is_active";
+
+function toStringArray(value: unknown): string[] {
+  if (Array.isArray(value)) return value.map((v) => String(v));
+  return [];
 }
+
+export function rowToProduct(r: Row): Product {
+  return {
+    id: r.id,
+    name: r.name,
+    description: r.description,
+    price: r.price,
+    category: r.category,
+    sizes: toStringArray(r.sizes),
+    colors: toStringArray(r.colors),
+    heroImage: r.hero_image,
+    gallery: toStringArray(r.gallery_images),
+    displayOrder: r.display_order,
+    active: r.is_active,
+    release: r.release_label,
+    alt: r.alt_text,
+    accent: r.accent,
+    glow: r.glow,
+    bgFrom: r.bg_from,
+    bgTo: r.bg_to,
+    ink: r.ink,
+  };
+}
+
+export function slugify(value: string, fallback = "product") {
+  return (
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 48) || fallback
+  );
+}
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function productToRow(p: Product, index: number) {
+  const defaults = {
+    accent: "oklch(0.75 0.03 250)",
+    glow: "oklch(0.85 0.02 240 / 0.22)",
+    bgFrom: "oklch(0.19 0.01 250)",
+    bgTo: "oklch(0.08 0.005 250)",
+    ink: "oklch(0.97 0.002 250)",
+  };
+  const row: {
+    id?: string;
+    slug: string;
+    name: string;
+    [k: string]: unknown;
+  } = {
+    slug: slugify(p.name || String(p.id)),
+    name: p.name,
+    description: p.description ?? "",
+    price: p.price ?? "",
+    category: p.category ?? "",
+    eyebrow: p.category ?? "",
+    color_name: p.colors?.[0] ?? "",
+    release_label: p.release ?? "",
+    alt_text: p.alt ?? p.name ?? "",
+    sizes: Array.isArray(p.sizes) ? p.sizes : [],
+    colors: Array.isArray(p.colors) ? p.colors : [],
+    hero_image: p.heroImage ?? "",
+    gallery_images: Array.isArray(p.gallery) ? p.gallery : [],
+    accent: p.accent || defaults.accent,
+    glow: p.glow || defaults.glow,
+    bg_from: p.bgFrom || defaults.bgFrom,
+    bg_to: p.bgTo || defaults.bgTo,
+    ink: p.ink || defaults.ink,
+    display_order: index,
+    is_active: p.active !== false,
+    updated_at: new Date().toISOString(),
+  };
+  row.id = UUID_RE.test(String(p.id)) ? String(p.id) : randomUUID();
+  return row;
+}
+
+/* ------------------------------------------------------------------ */
+/* Reads / writes                                                      */
+/* ------------------------------------------------------------------ */
 
 export async function readProducts(): Promise<Product[]> {
-  const file = await dataFile();
-  try {
-    const raw = await fs.readFile(file, "utf8");
-    return normalize(JSON.parse(raw));
-  } catch (error) {
-    console.warn(`[cms] falling back to seed products (${file}):`, error);
-    return normalize(seed);
+  const { data, error } = await supabaseAdmin
+    .from("products")
+    .select(COLUMNS)
+    .order("display_order", { ascending: true });
+  if (error) {
+    console.error("[cms] failed to read products:", error);
+    throw new Error("Could not load the catalogue from the database.");
   }
+  return (data as unknown as Row[]).map(rowToProduct);
 }
 
-/** Rejects payloads that would corrupt the catalogue. */
 function validate(products: unknown): Product[] {
   if (!Array.isArray(products)) throw new Error("Payload must be an array of products");
   const seen = new Set<string>();
@@ -145,29 +190,55 @@ function validate(products: unknown): Product[] {
 }
 
 /**
- * Merge-writes the catalogue: existing entries keep every field the admin did
- * not send, entries absent from the payload are removed (explicit deletion),
- * and display order follows the submitted order.
+ * Upserts the submitted catalogue: rows keep their id (no duplicates), rows
+ * missing from the payload are deleted, display order follows the payload.
  */
 export async function writeProducts(products: Product[]): Promise<Product[]> {
   const incoming = validate(products);
   const existing = await readProducts();
-  const byId = new Map(existing.map((p) => [p.id, p]));
 
-  const merged = incoming.map((p, i) => ({
-    ...(byId.get(p.id) ?? {}),
-    ...p,
-    displayOrder: i,
-  })) as Product[];
+  const keepIds = new Set(incoming.map((p) => p.id).filter((id) => UUID_RE.test(id)));
+  const removed = existing.filter((p) => !keepIds.has(p.id));
 
-  const file = await dataFile();
-  const tmp = `${file}.tmp`;
-  await fs.mkdir(path.dirname(file), { recursive: true });
-  await fs.writeFile(tmp, `${JSON.stringify(merged, null, 2)}\n`, "utf8");
-  await fs.rename(tmp, file);
-  console.info(`[cms] wrote ${merged.length} products to ${file}`);
-  return normalize(merged);
+  if (removed.length) {
+    const { error } = await supabaseAdmin
+      .from("products")
+      .delete()
+      .in(
+        "id",
+        removed.map((p) => p.id),
+      );
+    if (error) {
+      console.error("[cms] delete failed:", error);
+      throw new Error("Could not remove deleted products.");
+    }
+  }
+
+  const rows = incoming.map(productToRow);
+
+  const fail = (label: string, error: { code?: string; message?: string } | null) => {
+    if (!error) return;
+    console.error(`[cms] ${label} failed:`, error);
+    throw new Error(
+      error.code === "23505"
+        ? "Two products resolve to the same name — give them distinct names."
+        : "Could not save the products to the database.",
+    );
+  };
+
+  if (rows.length) {
+    const { error } = await supabaseAdmin
+      .from("products")
+      .upsert(rows as never, { onConflict: "id" });
+    fail("upsert", error);
+  }
+
+  return readProducts();
 }
+
+/* ------------------------------------------------------------------ */
+/* Storage                                                             */
+/* ------------------------------------------------------------------ */
 
 const EXT_BY_MIME: Record<string, string> = {
   "image/png": "png",
@@ -176,6 +247,12 @@ const EXT_BY_MIME: Record<string, string> = {
   "image/jpg": "jpg",
 };
 const ALLOWED_EXT = new Set(["png", "webp", "jpg", "jpeg"]);
+export const MIME_BY_EXT: Record<string, string> = {
+  png: "image/png",
+  webp: "image/webp",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+};
 
 export function safeFilename(name: string, ext: string) {
   const slug =
@@ -188,11 +265,19 @@ export function safeFilename(name: string, ext: string) {
   return `${slug}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}.${ext}`;
 }
 
-/** Writes raw bytes to /public/images and returns the public URL. */
+/** Storage object key for a public `/images/...` URL, or null. */
+export function storageKeyFromUrl(url: string): string | null {
+  if (!url?.startsWith(IMAGE_URL_PREFIX)) return null;
+  const key = url.slice(IMAGE_URL_PREFIX.length).split("?")[0]!;
+  return key.includes("..") || !key ? null : decodeURIComponent(key);
+}
+
+/** Uploads raw bytes to Supabase Storage and returns the app-served URL. */
 export async function saveImageBytes(
   bytes: Uint8Array,
   mime: string,
   originalName: string,
+  folder = "uploads",
 ): Promise<string> {
   const normalizedMime = mime.toLowerCase().split(";")[0]!.trim();
   const mimeExt = EXT_BY_MIME[normalizedMime];
@@ -203,50 +288,63 @@ export async function saveImageBytes(
   }
   if (!bytes.byteLength) throw new Error("The uploaded file is empty");
 
-  const dir = await imagesDir();
-  await fs.mkdir(dir, { recursive: true });
-  const filename = safeFilename(originalName, mimeExt);
-  const target = path.join(dir, filename);
-  await fs.writeFile(target, bytes);
-  console.info(`[cms] saved image ${target} (${bytes.byteLength} bytes)`);
-  return `/images/${filename}`;
+  const key = `${slugify(folder, "uploads")}/${safeFilename(originalName, mimeExt)}`;
+  const { error } = await supabaseAdmin.storage
+    .from(BUCKET)
+    .upload(key, bytes, { contentType: normalizedMime, upsert: false });
+  if (error) {
+    console.error("[cms] storage upload failed:", error);
+    throw new Error("Storage rejected the upload. Please try again.");
+  }
+  console.info(`[cms] uploaded ${key} (${bytes.byteLength} bytes)`);
+  return `${IMAGE_URL_PREFIX}${key}`;
 }
 
-/** Legacy data-URL path, kept for compatibility. */
-export async function saveImage(dataUrl: string, name: string): Promise<string> {
-  const match = /^data:([^;]+);base64,(.+)$/s.exec(dataUrl);
-  if (!match) throw new Error("Invalid image payload");
-  const [, mime, base64] = match;
-  return saveImageBytes(new Uint8Array(Buffer.from(base64!, "base64")), mime!, name);
+/** Streams a stored image back to the browser. */
+export async function downloadImage(key: string) {
+  const { data, error } = await supabaseAdmin.storage.from(BUCKET).download(key);
+  if (error || !data) return null;
+  return new Uint8Array(await data.arrayBuffer());
 }
 
 const PRUNE_GRACE_MS = 1000 * 60 * 60; // never delete very recent uploads
 
-/** Removes local uploads that are no longer referenced by any product. */
+async function listAllKeys(prefix = ""): Promise<{ key: string; createdAt: number }[]> {
+  const { data, error } = await supabaseAdmin.storage
+    .from(BUCKET)
+    .list(prefix, { limit: 1000, sortBy: { column: "name", order: "asc" } });
+  if (error || !data) return [];
+  const out: { key: string; createdAt: number }[] = [];
+  for (const entry of data) {
+    const full = prefix ? `${prefix}/${entry.name}` : entry.name;
+    if (entry.id === null) {
+      out.push(...(await listAllKeys(full)));
+    } else {
+      out.push({ key: full, createdAt: Date.parse(entry.created_at ?? "") || Date.now() });
+    }
+  }
+  return out;
+}
+
+/** Removes stored images that are no longer referenced by any product. */
 export async function pruneUnusedImages(products: Product[]) {
   const used = new Set<string>();
   for (const p of products) {
-    if (p.heroImage) used.add(p.heroImage);
-    for (const g of p.gallery ?? []) used.add(g);
+    for (const url of [p.heroImage, ...(p.gallery ?? [])]) {
+      const key = url && storageKeyFromUrl(url);
+      if (key) used.add(key);
+    }
   }
-  const dir = await imagesDir();
   try {
-    const files = await fs.readdir(dir);
-    await Promise.all(
-      files.map(async (f) => {
-        if (used.has(`/images/${f}`)) return;
-        const full = path.join(dir, f);
-        try {
-          const stat = await fs.stat(full);
-          if (Date.now() - stat.mtimeMs < PRUNE_GRACE_MS) return;
-          await fs.rm(full, { force: true });
-          console.info(`[cms] pruned unused image ${full}`);
-        } catch (error) {
-          console.warn(`[cms] could not prune ${full}:`, error);
-        }
-      }),
-    );
-  } catch {
-    /* images dir may not exist yet */
+    const all = await listAllKeys();
+    const stale = all
+      .filter((f) => !used.has(f.key) && Date.now() - f.createdAt > PRUNE_GRACE_MS)
+      .map((f) => f.key);
+    if (!stale.length) return;
+    const { error } = await supabaseAdmin.storage.from(BUCKET).remove(stale);
+    if (error) console.warn("[cms] prune failed:", error);
+    else console.info(`[cms] pruned ${stale.length} unused image(s)`);
+  } catch (error) {
+    console.warn("[cms] prune skipped:", error);
   }
 }

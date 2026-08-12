@@ -9,7 +9,6 @@ import {
   pruneUnusedImages,
   readProducts,
   requireAdmin,
-  saveImage,
   writeProducts,
 } from "@/lib/cms.server";
 
@@ -53,11 +52,4 @@ export const saveProductsFn = createServerFn({ method: "POST" })
       const message = error instanceof Error ? error.message : "Unknown error";
       return { ok: false as const, error: message, products: [] as Product[] };
     }
-  });
-
-export const uploadImageFn = createServerFn({ method: "POST" })
-  .inputValidator((data: { dataUrl: string; name: string }) => data)
-  .handler(async ({ data }) => {
-    await requireAdmin();
-    return { url: await saveImage(data.dataUrl, data.name) };
   });
