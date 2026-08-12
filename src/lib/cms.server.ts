@@ -215,16 +215,28 @@ export async function writeProducts(products: Product[]): Promise<Product[]> {
   }
 
   const rows = incoming.map(productToRow);
-  if (rows.length) {
-    const { error } = await supabaseAdmin.from("products").upsert(rows as never, { onConflict: "id" });
-    if (error) {
-      console.error("[cms] upsert failed:", error);
-      throw new Error(
-        error.code === "23505"
-          ? "Two products resolve to the same name — give them distinct names."
-          : "Could not save the products to the database.",
-      );
-    }
+  const updates = rows.filter((r) => r.id);
+  const inserts = rows.filter((r) => !r.id);
+
+  const fail = (label: string, error: { code?: string; message?: string } | null) => {
+    if (!error) return;
+    console.error(`[cms] ${label} failed:`, error);
+    throw new Error(
+      error.code === "23505"
+        ? "Two products resolve to the same name — give them distinct names."
+        : "Could not save the products to the database.",
+    );
+  };
+
+  if (updates.length) {
+    const { error } = await supabaseAdmin
+      .from("products")
+      .upsert(updates as never, { onConflict: "id" });
+    fail("upsert", error);
+  }
+  if (inserts.length) {
+    const { error } = await supabaseAdmin.from("products").insert(inserts as never);
+    fail("insert", error);
   }
 
   return readProducts();
