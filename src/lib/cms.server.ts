@@ -127,7 +127,7 @@ function productToRow(p: Product, index: number) {
     ink: "oklch(0.97 0.002 250)",
   };
   const row: {
-    id: string;
+    id?: string;
     slug: string;
     name: string;
     [k: string]: unknown;
