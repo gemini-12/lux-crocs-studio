@@ -54,6 +54,7 @@ export async function requireAdmin() {
 type Row = {
   id: string;
   slug: string;
+  brand: string;
   name: string;
   description: string;
   price: string;
@@ -76,7 +77,8 @@ type Row = {
 };
 
 const COLUMNS =
-  "id, slug, name, description, price, category, color_name, eyebrow, release_label, alt_text, sizes, colors, hero_image, gallery_images, accent, glow, bg_from, bg_to, ink, display_order, is_active";
+  "id, slug, brand, name, description, price, category, color_name, eyebrow, release_label, alt_text, sizes, colors, hero_image, gallery_images, accent, glow, bg_from, bg_to, ink, display_order, is_active";
+
 
 function toStringArray(value: unknown): string[] {
   if (Array.isArray(value)) return value.map((v) => String(v));
@@ -86,7 +88,9 @@ function toStringArray(value: unknown): string[] {
 export function rowToProduct(r: Row): Product {
   return {
     id: r.id,
+    brand: (r.brand as Product["brand"]) || "crocs",
     name: r.name,
+
     description: r.description,
     price: r.price,
     category: r.category,
@@ -118,7 +122,7 @@ export function slugify(value: string, fallback = "product") {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-function productToRow(p: Product, index: number) {
+function productToRow(p: Product, index: number, brand: string) {
   const defaults = {
     accent: "oklch(0.75 0.03 250)",
     glow: "oklch(0.85 0.02 240 / 0.22)",
@@ -132,7 +136,8 @@ function productToRow(p: Product, index: number) {
     name: string;
     [k: string]: unknown;
   } = {
-    slug: slugify(p.name || String(p.id)),
+    slug: `${brand === "crocs" ? "" : `${brand}-`}${slugify(p.name || String(p.id))}`,
+    brand,
     name: p.name,
     description: p.description ?? "",
     price: p.price ?? "",
@@ -162,17 +167,17 @@ function productToRow(p: Product, index: number) {
 /* Reads / writes                                                      */
 /* ------------------------------------------------------------------ */
 
-export async function readProducts(): Promise<Product[]> {
-  const { data, error } = await supabaseAdmin
-    .from("products")
-    .select(COLUMNS)
-    .order("display_order", { ascending: true });
+export async function readProducts(brand?: string): Promise<Product[]> {
+  let query = supabaseAdmin.from("products").select(COLUMNS);
+  if (brand) query = query.eq("brand", brand);
+  const { data, error } = await query.order("display_order", { ascending: true });
   if (error) {
     console.error("[cms] failed to read products:", error);
     throw new Error("Could not load the catalogue from the database.");
   }
   return (data as unknown as Row[]).map(rowToProduct);
 }
+
 
 function validate(products: unknown): Product[] {
   if (!Array.isArray(products)) throw new Error("Payload must be an array of products");
@@ -190,12 +195,13 @@ function validate(products: unknown): Product[] {
 }
 
 /**
- * Upserts the submitted catalogue: rows keep their id (no duplicates), rows
- * missing from the payload are deleted, display order follows the payload.
+ * Upserts the submitted catalogue for ONE brand universe: rows keep their id,
+ * rows of that brand missing from the payload are deleted, display order
+ * follows the payload. Other brands are never touched.
  */
-export async function writeProducts(products: Product[]): Promise<Product[]> {
+export async function writeProducts(products: Product[], brand = "crocs"): Promise<Product[]> {
   const incoming = validate(products);
-  const existing = await readProducts();
+  const existing = await readProducts(brand);
 
   const keepIds = new Set(incoming.map((p) => p.id).filter((id) => UUID_RE.test(id)));
   const removed = existing.filter((p) => !keepIds.has(p.id));
@@ -214,7 +220,7 @@ export async function writeProducts(products: Product[]): Promise<Product[]> {
     }
   }
 
-  const rows = incoming.map(productToRow);
+  const rows = incoming.map((p, i) => productToRow(p, i, brand));
 
   const fail = (label: string, error: { code?: string; message?: string } | null) => {
     if (!error) return;
@@ -233,8 +239,9 @@ export async function writeProducts(products: Product[]): Promise<Product[]> {
     fail("upsert", error);
   }
 
-  return readProducts();
+  return readProducts(brand);
 }
+
 
 /* ------------------------------------------------------------------ */
 /* Storage                                                             */

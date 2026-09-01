@@ -12,10 +12,12 @@ import {
   writeProducts,
 } from "@/lib/cms.server";
 
-export const getProducts = createServerFn({ method: "GET" }).handler(async () => {
-  setResponseHeader("cache-control", "no-store, must-revalidate");
-  return readProducts();
-});
+export const getProducts = createServerFn({ method: "GET" })
+  .inputValidator((data: { brand?: string } | undefined) => data ?? {})
+  .handler(async ({ data }) => {
+    setResponseHeader("cache-control", "no-store, must-revalidate");
+    return readProducts(data?.brand ?? "crocs");
+  });
 
 export const getAdminSession = createServerFn({ method: "GET" }).handler(async () => {
   return { unlocked: await isUnlocked() };
@@ -39,13 +41,15 @@ export const adminLogout = createServerFn({ method: "POST" }).handler(async () =
 });
 
 export const saveProductsFn = createServerFn({ method: "POST" })
-  .inputValidator((data: { products: Product[] }) => data)
+  .inputValidator((data: { products: Product[]; brand?: string }) => data)
   .handler(async ({ data }) => {
     await requireAdmin();
     setResponseHeader("cache-control", "no-store");
     try {
-      const saved = await writeProducts(data.products);
-      await pruneUnusedImages(saved);
+      const brand = data.brand ?? "crocs";
+      const saved = await writeProducts(data.products, brand);
+      // Prune against the WHOLE catalogue so the other universe keeps its images.
+      await pruneUnusedImages(await readProducts());
       return { ok: true as const, products: saved };
     } catch (error) {
       console.error("[cms] saving products failed:", error);

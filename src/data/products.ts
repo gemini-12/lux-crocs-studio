@@ -1,10 +1,13 @@
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 
 import { getProducts } from "@/lib/cms.functions";
+import { useBrand, type BrandId } from "@/data/brands";
 
 /** Product shape stored in the cloud database — the single source of truth. */
 export type Product = {
   id: string;
+  /** Universe the product belongs to: "crocs" or "nike-mind". */
+  brand: BrandId;
   name: string;
   description: string;
   price: string;
@@ -66,14 +69,17 @@ export function toSlide(p: Product): Slide {
   };
 }
 
-export const productsQueryOptions = queryOptions({
-  queryKey: ["products"],
-  queryFn: () => getProducts(),
-});
+export function productsQueryOptions(brand: BrandId) {
+  return queryOptions({
+    queryKey: ["products", brand],
+    queryFn: () => getProducts({ data: { brand } }),
+  });
+}
 
-/** Storefront hook: only active products, ordered by displayOrder. */
+/** Storefront hook: only active products of the current universe. */
 export function useSlides(): Slide[] {
-  const { data } = useSuspenseQuery(productsQueryOptions);
+  const brand = useBrand();
+  const { data } = useSuspenseQuery(productsQueryOptions(brand.id));
   return data
     .filter((p) => p.active !== false)
     .sort((a, b) => a.displayOrder - b.displayOrder)
