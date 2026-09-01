@@ -20,6 +20,7 @@ export type Database = {
           alt_text: string
           bg_from: string
           bg_to: string
+          brand: string
           category: string
           color_name: string
           colors: Json
@@ -45,6 +46,7 @@ export type Database = {
           alt_text?: string
           bg_from?: string
           bg_to?: string
+          brand?: string
           category?: string
           color_name?: string
           colors?: Json
@@ -70,6 +72,7 @@ export type Database = {
           alt_text?: string
           bg_from?: string
           bg_to?: string
+          brand?: string
           category?: string
           color_name?: string
           colors?: Json
