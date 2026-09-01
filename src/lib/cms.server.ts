@@ -122,7 +122,7 @@ export function slugify(value: string, fallback = "product") {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-function productToRow(p: Product, index: number) {
+function productToRow(p: Product, index: number, brand: string) {
   const defaults = {
     accent: "oklch(0.75 0.03 250)",
     glow: "oklch(0.85 0.02 240 / 0.22)",
@@ -136,7 +136,8 @@ function productToRow(p: Product, index: number) {
     name: string;
     [k: string]: unknown;
   } = {
-    slug: slugify(p.name || String(p.id)),
+    slug: `${brand === "crocs" ? "" : `${brand}-`}${slugify(p.name || String(p.id))}`,
+    brand,
     name: p.name,
     description: p.description ?? "",
     price: p.price ?? "",
