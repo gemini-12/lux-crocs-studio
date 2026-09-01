@@ -167,17 +167,17 @@ function productToRow(p: Product, index: number, brand: string) {
 /* Reads / writes                                                      */
 /* ------------------------------------------------------------------ */
 
-export async function readProducts(): Promise<Product[]> {
-  const { data, error } = await supabaseAdmin
-    .from("products")
-    .select(COLUMNS)
-    .order("display_order", { ascending: true });
+export async function readProducts(brand?: string): Promise<Product[]> {
+  let query = supabaseAdmin.from("products").select(COLUMNS);
+  if (brand) query = query.eq("brand", brand);
+  const { data, error } = await query.order("display_order", { ascending: true });
   if (error) {
     console.error("[cms] failed to read products:", error);
     throw new Error("Could not load the catalogue from the database.");
   }
   return (data as unknown as Row[]).map(rowToProduct);
 }
+
 
 function validate(products: unknown): Product[] {
   if (!Array.isArray(products)) throw new Error("Payload must be an array of products");
