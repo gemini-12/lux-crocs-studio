@@ -54,6 +54,7 @@ export async function requireAdmin() {
 type Row = {
   id: string;
   slug: string;
+  brand: string;
   name: string;
   description: string;
   price: string;
@@ -76,7 +77,8 @@ type Row = {
 };
 
 const COLUMNS =
-  "id, slug, name, description, price, category, color_name, eyebrow, release_label, alt_text, sizes, colors, hero_image, gallery_images, accent, glow, bg_from, bg_to, ink, display_order, is_active";
+  "id, slug, brand, name, description, price, category, color_name, eyebrow, release_label, alt_text, sizes, colors, hero_image, gallery_images, accent, glow, bg_from, bg_to, ink, display_order, is_active";
+
 
 function toStringArray(value: unknown): string[] {
   if (Array.isArray(value)) return value.map((v) => String(v));
@@ -86,7 +88,9 @@ function toStringArray(value: unknown): string[] {
 export function rowToProduct(r: Row): Product {
   return {
     id: r.id,
+    brand: (r.brand as Product["brand"]) || "crocs",
     name: r.name,
+
     description: r.description,
     price: r.price,
     category: r.category,
