@@ -195,12 +195,13 @@ function validate(products: unknown): Product[] {
 }
 
 /**
- * Upserts the submitted catalogue: rows keep their id (no duplicates), rows
- * missing from the payload are deleted, display order follows the payload.
+ * Upserts the submitted catalogue for ONE brand universe: rows keep their id,
+ * rows of that brand missing from the payload are deleted, display order
+ * follows the payload. Other brands are never touched.
  */
-export async function writeProducts(products: Product[]): Promise<Product[]> {
+export async function writeProducts(products: Product[], brand = "crocs"): Promise<Product[]> {
   const incoming = validate(products);
-  const existing = await readProducts();
+  const existing = await readProducts(brand);
 
   const keepIds = new Set(incoming.map((p) => p.id).filter((id) => UUID_RE.test(id)));
   const removed = existing.filter((p) => !keepIds.has(p.id));
@@ -219,7 +220,7 @@ export async function writeProducts(products: Product[]): Promise<Product[]> {
     }
   }
 
-  const rows = incoming.map(productToRow);
+  const rows = incoming.map((p, i) => productToRow(p, i, brand));
 
   const fail = (label: string, error: { code?: string; message?: string } | null) => {
     if (!error) return;
@@ -238,8 +239,9 @@ export async function writeProducts(products: Product[]): Promise<Product[]> {
     fail("upsert", error);
   }
 
-  return readProducts();
+  return readProducts(brand);
 }
+
 
 /* ------------------------------------------------------------------ */
 /* Storage                                                             */
