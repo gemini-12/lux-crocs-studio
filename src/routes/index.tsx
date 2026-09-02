@@ -25,7 +25,7 @@ export const Route = createFileRoute("/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(productsQueryOptions),
+  loader: ({ context }) => context.queryClient.ensureQueryData(productsQueryOptions("crocs")),
   component: Index,
 });
 

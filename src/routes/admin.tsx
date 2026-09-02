@@ -19,6 +19,7 @@ import {
 
 import type { Product } from "@/data/products";
 import { productsQueryOptions } from "@/data/products";
+import type { BrandId } from "@/data/brands";
 import {
   adminLogin,
   adminLogout,
@@ -130,7 +131,8 @@ const NAV: { id: Tab; label: string; icon: typeof FiGrid }[] = [
 
 function Dashboard({ onLoggedOut }: { onLoggedOut: () => void }) {
   const qc = useQueryClient();
-  const productsQuery = useQuery(productsQueryOptions);
+  const brandId: BrandId = "crocs";
+  const productsQuery = useQuery(productsQueryOptions(brandId));
   const save = useServerFn(saveProductsFn);
   const logout = useServerFn(adminLogout);
 
@@ -147,7 +149,7 @@ function Dashboard({ onLoggedOut }: { onLoggedOut: () => void }) {
   }, [productsQuery.data, dirty]);
 
   const saveMutation = useMutation({
-    mutationFn: (next: Product[]) => save({ data: { products: next } }),
+    mutationFn: (next: Product[]) => save({ data: { products: next, brand: brandId } }),
     onSuccess: (res) => {
       if (!res.ok) {
         toast.error(`Could not save: ${res.error}`);
@@ -155,7 +157,7 @@ function Dashboard({ onLoggedOut }: { onLoggedOut: () => void }) {
       }
       setItems(res.products);
       setDirty(false);
-      qc.setQueryData(productsQueryOptions.queryKey, res.products);
+      qc.setQueryData(productsQueryOptions(brandId).queryKey, res.products);
       qc.invalidateQueries({ queryKey: ["products"] });
       toast.success("Changes saved — storefront updated");
     },
