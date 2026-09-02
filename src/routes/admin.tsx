@@ -19,6 +19,7 @@ import {
 
 import type { Product } from "@/data/products";
 import { productsQueryOptions } from "@/data/products";
+import type { BrandId } from "@/data/brands";
 import {
   adminLogin,
   adminLogout,
