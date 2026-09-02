@@ -16,6 +16,7 @@ export type Draft = Omit<Product, "sizes" | "colors" | "gallery"> & {
 export function emptyProduct(order: number): Draft {
   return {
     id: `p-${Date.now().toString(36)}`,
+    brand: "crocs",
     name: "",
     description: "",
     price: "",
