@@ -1,3 +1,5 @@
+import { useBrand } from "@/data/brands";
+
 const COLUMNS = [
   { title: "Shop", links: ["New arrivals", "Collection", "Archive", "Gift cards"] },
   { title: "Support", links: ["Sizing", "Shipping", "Returns", "Authenticity"] },
@@ -5,16 +7,19 @@ const COLUMNS = [
 ];
 
 export function Footer() {
+  const brand = useBrand();
   return (
     <footer id="archive" className="border-t border-hairline bg-black">
       <div className="mx-auto max-w-[1600px] px-6 py-20 md:px-10">
         <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
           <div className="col-span-2 md:col-span-1">
             <p className="text-sm font-semibold uppercase tracking-[0.4em] text-ink">
-              Croc<span className="text-muted-ink">.</span>Atelier
+              {brand.wordmark}
+              <span className="text-muted-ink">.</span>
+              {brand.wordmarkAccent}
             </p>
             <p className="mt-5 max-w-xs text-sm leading-relaxed text-muted-ink">
-              Collectible footwear, produced in numbered series from a studio in Antwerp.
+              {brand.studioLine}
             </p>
           </div>
           {COLUMNS.map((col) => (
@@ -39,7 +44,7 @@ export function Footer() {
         </div>
 
         <div className="mt-16 flex flex-wrap items-center justify-between gap-4 border-t border-hairline pt-8">
-          <p className="text-xs text-muted-ink">© {new Date().getFullYear()} Croc.Atelier</p>
+          <p className="text-xs text-muted-ink">© {new Date().getFullYear()} {brand.wordmark}.{brand.wordmarkAccent}</p>
           <p className="text-xs text-muted-ink">Antwerp · Tokyo · Los Angeles</p>
         </div>
       </div>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { FiHeart, FiMinus, FiPlus, FiArrowRight } from "react-icons/fi";
 import { useSlides } from "@/data/products";
+import { useBrand } from "@/data/brands";
 
 const SPECS = [
   ["Material", "Croslite™ resin, hand-finished"],
@@ -14,6 +15,7 @@ const WHATSAPP_NUMBER = "212616378424";
 
 export function ProductSection() {
   const slides = useSlides();
+  const brand = useBrand();
   const [colorIndex, setColorIndex] = useState(0);
   const [size, setSize] = useState<string | null>(null);
   const [qty, setQty] = useState(1);
@@ -34,7 +36,7 @@ export function ProductSection() {
     const message = [
       "Hello,",
       "",
-      "I would like to order the following Crocs:",
+      `I would like to order the following ${brand.orderNoun}:`,
       "",
       `Product: ${product.title}`,
       `Color: ${product.colorName}`,
