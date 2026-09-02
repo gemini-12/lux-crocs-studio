@@ -11,7 +11,7 @@ export type BrandConfig = {
   /** Short label used in the universe switcher */
   short: string;
   /** Base path of the universe */
-  path: string;
+  path: "/" | "/nike-mind";
   studioLine: string;
   orderNoun: string;
 };

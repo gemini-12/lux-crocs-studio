@@ -11,11 +11,11 @@ import { HiddenAdminAccess } from "@/components/site/HiddenAdminAccess";
 import { productsQueryOptions } from "@/data/products";
 import { BrandProvider } from "@/data/brands";
 
-const title = "Croc.Atelier — Collectible Crocs, Numbered Series";
+const title = "Nike Mind 001 — Sculpted Slip-On Mules, Released in Waves";
 const description =
-  "Limited-edition collectible Crocs released in numbered series. Cars, SpongeBob SquarePants and Batman Classic Clogs, from the Croc.Atelier studio.";
+  "Nike Mind 001 mules in Team Red, Blackened Blue, Geode Teal, White and Black. A separate universe from the Croc.Atelier studio, released in numbered waves.";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/nike-mind")({
   head: () => ({
     meta: [
       { title },
@@ -26,13 +26,13 @@ export const Route = createFileRoute("/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(productsQueryOptions("crocs")),
-  component: Index,
+  loader: ({ context }) => context.queryClient.ensureQueryData(productsQueryOptions("nike-mind")),
+  component: NikeMindPage,
 });
 
-function Index() {
+function NikeMindPage() {
   return (
-    <BrandProvider brand="crocs">
+    <BrandProvider brand="nike-mind">
       <SmoothScroll />
       <Header />
       <main>

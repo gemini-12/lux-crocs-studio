@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiSearch, FiShoppingBag, FiUser, FiMenu, FiX } from "react-icons/fi";
+import { Link } from "@tanstack/react-router";
+
+import { BRAND_LIST, useBrand } from "@/data/brands";
 
 const NAV = ["Collection", "Product", "Gallery", "Archive"];
 
 export function Header() {
+  const brand = useBrand();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -27,9 +31,38 @@ export function Header() {
       }`}
     >
       <div className="mx-auto flex h-20 max-w-[1600px] items-center justify-between px-6 md:px-10">
-        <a href="#top" className="text-sm font-semibold uppercase tracking-[0.4em] text-ink">
-          Croc<span className="text-muted-ink">.</span>Atelier
-        </a>
+        <div className="flex items-center gap-6">
+          <Link
+            to={brand.path}
+            className="text-sm font-semibold uppercase tracking-[0.4em] text-ink"
+          >
+            {brand.wordmark}
+            <span className="text-muted-ink">.</span>
+            {brand.wordmarkAccent}
+          </Link>
+
+          <div
+            role="tablist"
+            aria-label="Universe"
+            className="hidden items-center gap-1 rounded-full border border-hairline bg-white/5 p-1 backdrop-blur-xl lg:flex"
+          >
+            {BRAND_LIST.map((b) => (
+              <Link
+                key={b.id}
+                to={b.path}
+                role="tab"
+                aria-selected={b.id === brand.id}
+                className={`rounded-full px-4 py-1.5 text-[0.6rem] uppercase tracking-[0.25em] transition-colors ${
+                  b.id === brand.id
+                    ? "bg-ink/90 text-black"
+                    : "text-muted-ink hover:text-ink"
+                }`}
+              >
+                {b.short}
+              </Link>
+            ))}
+          </div>
+        </div>
 
         <nav aria-label="Primary" className="hidden md:block">
           <ul className="flex items-center gap-10">

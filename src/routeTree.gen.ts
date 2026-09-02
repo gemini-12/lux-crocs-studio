@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as NikeMindRouteImport } from './routes/nike-mind'
 import { Route as ImagesSplatRouteImport } from './routes/images/$'
 import { Route as ApiAdminUploadRouteImport } from './routes/api/admin/upload'
 
@@ -22,6 +23,11 @@ const IndexRoute = IndexRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NikeMindRoute = NikeMindRouteImport.update({
+  id: '/nike-mind',
+  path: '/nike-mind',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ImagesSplatRoute = ImagesSplatRouteImport.update({
@@ -38,12 +44,14 @@ const ApiAdminUploadRoute = ApiAdminUploadRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/nike-mind': typeof NikeMindRoute
   '/images/$': typeof ImagesSplatRoute
   '/api/admin/upload': typeof ApiAdminUploadRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/nike-mind': typeof NikeMindRoute
   '/images/$': typeof ImagesSplatRoute
   '/api/admin/upload': typeof ApiAdminUploadRoute
 }
@@ -51,20 +59,28 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/nike-mind': typeof NikeMindRoute
   '/images/$': typeof ImagesSplatRoute
   '/api/admin/upload': typeof ApiAdminUploadRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/images/$' | '/api/admin/upload'
+  fullPaths: '/' | '/admin' | '/nike-mind' | '/images/$' | '/api/admin/upload'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/images/$' | '/api/admin/upload'
-  id: '__root__' | '/' | '/admin' | '/images/$' | '/api/admin/upload'
+  to: '/' | '/admin' | '/nike-mind' | '/images/$' | '/api/admin/upload'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/nike-mind'
+    | '/images/$'
+    | '/api/admin/upload'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  NikeMindRoute: typeof NikeMindRoute
   ImagesSplatRoute: typeof ImagesSplatRoute
   ApiAdminUploadRoute: typeof ApiAdminUploadRoute
 }
@@ -83,6 +99,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nike-mind': {
+      id: '/nike-mind'
+      path: '/nike-mind'
+      fullPath: '/nike-mind'
+      preLoaderRoute: typeof NikeMindRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/images/$': {
@@ -105,6 +128,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  NikeMindRoute: NikeMindRoute,
   ImagesSplatRoute: ImagesSplatRoute,
   ApiAdminUploadRoute: ApiAdminUploadRoute,
 }

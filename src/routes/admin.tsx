@@ -20,6 +20,7 @@ import {
 import type { Product } from "@/data/products";
 import { productsQueryOptions } from "@/data/products";
 import type { BrandId } from "@/data/brands";
+import { BRAND_LIST } from "@/data/brands";
 import {
   adminLogin,
   adminLogout,
@@ -131,7 +132,7 @@ const NAV: { id: Tab; label: string; icon: typeof FiGrid }[] = [
 
 function Dashboard({ onLoggedOut }: { onLoggedOut: () => void }) {
   const qc = useQueryClient();
-  const brandId: BrandId = "crocs";
+  const [brandId, setBrandId] = useState<BrandId>("crocs");
   const productsQuery = useQuery(productsQueryOptions(brandId));
   const save = useServerFn(saveProductsFn);
   const logout = useServerFn(adminLogout);
@@ -147,6 +148,16 @@ function Dashboard({ onLoggedOut }: { onLoggedOut: () => void }) {
   useEffect(() => {
     if (productsQuery.data && !dirty) setItems(productsQuery.data);
   }, [productsQuery.data, dirty]);
+
+  const switchBrand = (id: BrandId) => {
+    if (id === brandId) return;
+    if (dirty && !confirm("Unsaved changes will be lost. Switch universe?")) return;
+    setBrandId(id);
+    setDirty(false);
+    setItems([]);
+    setEditing(null);
+    setConfirmId(null);
+  };
 
   const saveMutation = useMutation({
     mutationFn: (next: Product[]) => save({ data: { products: next, brand: brandId } }),
@@ -199,7 +210,7 @@ function Dashboard({ onLoggedOut }: { onLoggedOut: () => void }) {
         {/* sidebar */}
         <aside className="h-max rounded-3xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-2xl md:sticky md:top-8 md:w-60">
           <p className="px-3 py-2 text-[0.65rem] uppercase tracking-[0.3em] text-white/40">
-            Croc.Atelier
+            Studio CMS
           </p>
           <nav className="mt-3 flex gap-1 md:flex-col">
             {NAV.map((n) => (
@@ -236,12 +247,31 @@ function Dashboard({ onLoggedOut }: { onLoggedOut: () => void }) {
                 {dirty ? "Unsaved changes" : "Everything is in sync"}
               </p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <div
+                role="tablist"
+                aria-label="Universe"
+                className="flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] p-1"
+              >
+                {BRAND_LIST.map((b) => (
+                  <button
+                    key={b.id}
+                    role="tab"
+                    aria-selected={b.id === brandId}
+                    onClick={() => switchBrand(b.id)}
+                    className={`rounded-full px-4 py-2 text-xs transition-colors ${
+                      b.id === brandId ? "bg-white text-black" : "text-white/50 hover:text-white"
+                    }`}
+                  >
+                    {b.short}
+                  </button>
+                ))}
+              </div>
               {tab === "products" && (
                 <button
                   onClick={() => {
                     setIsNew(true);
-                    setEditing(emptyProduct(items.length));
+                    setEditing({ ...emptyProduct(items.length), brand: brandId });
                   }}
                   className="inline-flex items-center gap-2 rounded-full border border-white/15 px-5 py-2.5 text-sm text-white/80 transition-colors hover:text-white"
                 >
