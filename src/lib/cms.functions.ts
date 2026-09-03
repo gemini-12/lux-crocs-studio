@@ -16,7 +16,10 @@ export const getProducts = createServerFn({ method: "GET" })
   .inputValidator((data: { brand?: string } | undefined) => data ?? {})
   .handler(async ({ data }) => {
     setResponseHeader("cache-control", "no-store, must-revalidate");
-    return readProducts(data?.brand ?? "crocs");
+    // Admins see the full catalogue (including inactive products); visitors
+    // only get what the public access rules expose.
+    const admin = await isUnlocked();
+    return readProducts(data?.brand ?? "crocs", { admin });
   });
 
 export const getAdminSession = createServerFn({ method: "GET" }).handler(async () => {
