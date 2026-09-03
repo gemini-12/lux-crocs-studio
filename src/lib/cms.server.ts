@@ -1,7 +1,7 @@
 import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import { useSession } from "@tanstack/react-start/server";
 
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { adminClient, publicClient, resetAdminClient } from "@/lib/supabase-runtime.server";
 import type { Product } from "@/data/products";
 
 export const BUCKET = "product-images";
@@ -167,8 +167,14 @@ function productToRow(p: Product, index: number, brand: string) {
 /* Reads / writes                                                      */
 /* ------------------------------------------------------------------ */
 
-export async function readProducts(brand?: string): Promise<Product[]> {
-  let query = supabaseAdmin.from("products").select(COLUMNS);
+export async function readProducts(
+  brand?: string,
+  options: { admin?: boolean } = {},
+): Promise<Product[]> {
+  // Signed-in admin reads see every row (including inactive ones); the public
+  // storefront reads through the anon key + RLS.
+  const db = options.admin ? await adminClient() : publicClient();
+  let query = db.from("products").select(COLUMNS);
   if (brand) query = query.eq("brand", brand);
   const { data, error } = await query.order("display_order", { ascending: true });
   if (error) {
@@ -201,13 +207,13 @@ function validate(products: unknown): Product[] {
  */
 export async function writeProducts(products: Product[], brand = "crocs"): Promise<Product[]> {
   const incoming = validate(products);
-  const existing = await readProducts(brand);
+  const existing = await readProducts(brand, { admin: true });
 
   const keepIds = new Set(incoming.map((p) => p.id).filter((id) => UUID_RE.test(id)));
   const removed = existing.filter((p) => !keepIds.has(p.id));
 
   if (removed.length) {
-    const { error } = await supabaseAdmin
+    const { error } = await (await adminClient())
       .from("products")
       .delete()
       .in(
@@ -233,13 +239,13 @@ export async function writeProducts(products: Product[], brand = "crocs"): Promi
   };
 
   if (rows.length) {
-    const { error } = await supabaseAdmin
+    const { error } = await (await adminClient())
       .from("products")
       .upsert(rows as never, { onConflict: "id" });
     fail("upsert", error);
   }
 
-  return readProducts(brand);
+  return readProducts(brand, { admin: true });
 }
 
 
@@ -296,11 +302,12 @@ export async function saveImageBytes(
   if (!bytes.byteLength) throw new Error("The uploaded file is empty");
 
   const key = `${slugify(folder, "uploads")}/${safeFilename(originalName, mimeExt)}`;
-  const { error } = await supabaseAdmin.storage
+  const { error } = await (await adminClient()).storage
     .from(BUCKET)
     .upload(key, bytes, { contentType: normalizedMime, upsert: false });
   if (error) {
     console.error("[cms] storage upload failed:", error);
+    resetAdminClient();
     throw new Error("Storage rejected the upload. Please try again.");
   }
   console.info(`[cms] uploaded ${key} (${bytes.byteLength} bytes)`);
@@ -309,7 +316,7 @@ export async function saveImageBytes(
 
 /** Streams a stored image back to the browser. */
 export async function downloadImage(key: string) {
-  const { data, error } = await supabaseAdmin.storage.from(BUCKET).download(key);
+  const { data, error } = await publicClient().storage.from(BUCKET).download(key);
   if (error || !data) return null;
   return new Uint8Array(await data.arrayBuffer());
 }
@@ -317,7 +324,7 @@ export async function downloadImage(key: string) {
 const PRUNE_GRACE_MS = 1000 * 60 * 60; // never delete very recent uploads
 
 async function listAllKeys(prefix = ""): Promise<{ key: string; createdAt: number }[]> {
-  const { data, error } = await supabaseAdmin.storage
+  const { data, error } = await (await adminClient()).storage
     .from(BUCKET)
     .list(prefix, { limit: 1000, sortBy: { column: "name", order: "asc" } });
   if (error || !data) return [];
@@ -348,7 +355,7 @@ export async function pruneUnusedImages(products: Product[]) {
       .filter((f) => !used.has(f.key) && Date.now() - f.createdAt > PRUNE_GRACE_MS)
       .map((f) => f.key);
     if (!stale.length) return;
-    const { error } = await supabaseAdmin.storage.from(BUCKET).remove(stale);
+    const { error } = await (await adminClient()).storage.from(BUCKET).remove(stale);
     if (error) console.warn("[cms] prune failed:", error);
     else console.info(`[cms] pruned ${stale.length} unused image(s)`);
   } catch (error) {
