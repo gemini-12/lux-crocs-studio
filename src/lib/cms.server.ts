@@ -8,32 +8,32 @@ export const BUCKET = "product-images";
 /** Public path prefix served by src/routes/images/$.ts (streams from Storage). */
 export const IMAGE_URL_PREFIX = "/images/";
 
-/** Server-only. Never imported by client code. */
-const ADMIN_PASSWORD = process.env["ADMIN_PASSWORD"] ?? "simo123";
-const SESSION_PASSWORD =
-  process.env["ADMIN_SESSION_SECRET"] ??
-  process.env["SESSION_SECRET"] ??
-  "croc-atelier-admin-session-secret-key-v1-2026";
-
-const sessionConfig = {
-  password: SESSION_PASSWORD,
-  name: "croc-admin",
-  maxAge: 60 * 60 * 12,
-  cookie: { httpOnly: true, secure: true, sameSite: "lax" as const, path: "/" },
-};
-
 type AdminSession = { unlocked?: boolean };
+
+/** Build session settings per request so Vercel runtime variables are available. */
+function getSessionConfig() {
+  return {
+    password:
+      process.env["ADMIN_SESSION_SECRET"] ??
+      process.env["SESSION_SECRET"] ??
+      "croc-atelier-admin-session-secret-key-v1-2026",
+    name: "croc-admin",
+    maxAge: 60 * 60 * 12,
+    cookie: { httpOnly: true, secure: true, sameSite: "lax" as const, path: "/" },
+  };
+}
 
 function digest(value: string) {
   return createHash("sha256").update(value, "utf8").digest();
 }
 
 export function passwordMatches(input: string) {
-  return timingSafeEqual(digest(input), digest(ADMIN_PASSWORD));
+  const adminPassword = process.env["ADMIN_PASSWORD"] ?? "simo123";
+  return timingSafeEqual(digest(input), digest(adminPassword));
 }
 
 export async function getSession() {
-  return useSession<AdminSession>(sessionConfig);
+  return useSession<AdminSession>(getSessionConfig());
 }
 
 export async function isUnlocked() {

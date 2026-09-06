@@ -16,10 +16,8 @@ import type { Database } from "@/integrations/supabase/types";
 type Client = SupabaseClient<Database>;
 
 function env(...names: string[]): string | undefined {
-  const source = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process
-    ?.env;
   for (const name of names) {
-    const value = source?.[name];
+    const value = process.env[name];
     if (value) return value;
   }
   return undefined;
